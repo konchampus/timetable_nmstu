@@ -90,8 +90,27 @@ async def robots_policy(path: str) -> float:
     return float(parser.crawl_delay("MagtuCompanion") or parser.crawl_delay("*") or 0)
 
 
+def validate_source_request(path: str, params: dict | None) -> None:
+    # This application is a finite public timetable viewer, not a URL crawler.
+    # Only the website's own search endpoint and canonical timetable pages are used.
+    if path == "/api/v2/search":
+        if not params or set(params) != {"q"} or not isinstance(params["q"], str) or not 2 <= len(params["q"]) <= 100:
+            raise HTTPException(422, "Недопустимый запрос поиска")
+    elif path == "/robots.txt":
+        if params:
+            raise HTTPException(422, "Недопустимые параметры источника")
+    else:
+        if params or not path.startswith("/") or "/" in path[1:]:
+            raise HTTPException(422, "Недопустимый путь источника")
+        canonical_slug(unquote(path[1:]))
+
+
 async def source_get(path: str, params: dict | None = None, check_robots: bool = True) -> str:
-    spacing = await robots_policy(path) if check_robots else 0
+    validate_source_request(path, params)
+    # robots.txt is a crawler/indexing policy, not an HTTP authorization decision.
+    # Strict crawler-policy mode remains available to the deployment operator.
+    # Public-viewer mode never changes identity, follows redirects or retries 403/429.
+    spacing = await robots_policy(path) if check_robots and config.source_access_mode == "robots" else 0
     for attempt in range(3):
         await reserve_request(spacing)
         try:

@@ -1,5 +1,6 @@
 import re
 from functools import lru_cache
+from typing import Literal
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 from pydantic import Field, field_validator, model_validator
@@ -16,6 +17,7 @@ class Config(BaseSettings):
     admin_ids: list[int] = []
     auth_max_age: int = Field(default=300, ge=30, le=3600)
     session_seconds: int = Field(default=3600, ge=300, le=86400)
+    source_access_mode: Literal["public_viewer", "robots"] = "public_viewer"
     source_ttl_seconds: int = Field(default=900, ge=60)
     source_max_age_seconds: int = Field(default=86400, ge=900)
     source_timeout_seconds: int = Field(default=15, ge=2, le=60)
