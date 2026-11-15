@@ -65,3 +65,13 @@
 Ключ и копии не публиковались и не скачивались. Внешнее backup-хранилище, автоматическое расписание backup и проверка восстановления не настроены/не выполнялись.
 
 Автоматические suites, нагрузочные/security/concurrency испытания, приёмка всех 12 игр и пользовательский сценарий авторизации внутри Telegram не запускались. Работоспособность всего продукта не выводится из health-check: подтверждены перечисленные сборка, развёртывание и конкретные живые обращения поиска/расписания.
+## Web-only редизайн · 2026-11-16
+
+- Feature branch feat/companion-mini-app-redesign, source commit 5d8b66a6fd7993e839e2278bec5c1095a22834b4. Собран архив точного commit; production image: magtu-companion-web:mini-app-5d8b66a.
+- Desktop-скриншот живого production-экрана: 1280 × 902, подписанный режим без Telegram initData; accessibility snapshot увидел страницу и первичные иллюстрации. Публичная домашняя страница и 12 отдельных game-art WebP: HTTP 200.
+- Docker npm ci: 0 найденных vulnerabilities. TypeScript + Vite production build завершились успешно; 1598 модулей, ~8.4 kB CSS gzip для основного stylesheet. Three.js GameScene — отдельный lazy chunk 513 kB minified / 132.44 kB gzip, Vite напечатал стандартное предупреждение >500 kB.
+- Пересоздан и healthy только Compose service web; api, bot, worker и PostgreSQL имели прежние container ID. PostgreSQL оставлен без изменений, несмотря на предупреждение Compose про уже существующий orphan container. Автоматическая очистка orphans не запускалась.
+- Для отката сохранён прежний image tag magtu-companion-web:pre-mini-app-redesign-5d8b66a. Код/контейнеры backend и БД не обновлялись; миграции не запускались.
+- Мобильный браузерный снимок получить не получилось: отдельные Playwright/Chrome DevTools подключения требуют установленного Chrome stable, но его на машине нет; установку браузера без отдельного разрешения не выполнял. Media queries/safe-area CSS проверены статически, mobile визуальный результат не утверждать.
+- Открыт гостевой маршрут без Telegram initData. Личный экран, расписание с конкретным аккаунтом, настройки, игровые действия и серверные исходы из UI не эмулировались; пользователя, выдуманные балансы и результаты не создавал. Browser-console через доступный GUI transport недоступна; успешные live HTTP ответы перечислены выше.
+
