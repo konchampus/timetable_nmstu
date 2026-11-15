@@ -1,0 +1,39 @@
+# Implementation contract v1
+
+Only modify your delegated paths. Read spec.md and PRODUCT.md. No tests, builds, verification commands or package installs without Lead coordination. No production/SSH actions. Python async SQLAlchemy/PostgreSQL, FastAPI and aiogram; React TS. All secrets via environment.
+
+## Ownership
+- core-backend: backend/ excluding backend/app/games/. Own models, db/config/security, API auth/schedule/users/notes, timetable adapter, bot and worker, requirements and Alembic.
+- game-engine: backend/app/games/ only. Server-authoritative mechanics, database models, router and security.
+- game-ui: frontend/src/games/ only. Complete 12-game React UI, three.js scenes, Web Audio, module CSS.
+- Lead: frontend/ outside games/, docs, deployment, integration.
+
+## Shared Python contracts
+backend/app/db.py exports Base (DeclarativeBase), async_session_factory (async_sessionmaker). Per-request async Session dependency get_session.
+backend/app/models.py exports User: id BigInteger Telegram ID primary key, active Boolean; Settings separate persisted preferences.
+backend/app/security.py exports current_user FastAPI dependency returning User, using verified Telegram auth and short-lived session. Game router imports from these.
+backend/app/games/router.py exports router APIRouter(prefix="/games"). Main mounts with /api. Games own models imported into Alembic metadata. get_session transactions: service commits explicitly; current_user performs independent read session so no implicit transaction on mutation session. Game service MUST lock User row with active check to serialize with account deletion. No user-controlled owner ID.
+
+Auth: POST /api/auth/telegram {init_data:string} -> {token:string, user:{id:number,name:string}}. Token kept in React memory, Authorization: Bearer. GET /api/me -> {id,account_generation:string(UUID),name,settings:Settings,wallet?:{balance:number}}. Account generation changes after deletion/recreation and namespaces client recovery intents; missing generation gates game mutations closed. current_user principal carries ephemeral auth_digest; app.security.lock_authenticated_user(session, principal) locks User then revalidates same generation and SAME unexpired AuthSession. All protected owner reads/mutations must call it. GamesService receives principal (not bare Telegram ID) and uses this helper before User→Wallet→Round sequence.
+Settings shape: {version:number,home_entity:string|null,home_name:string|null,notifications_enabled:boolean,before_minutes:number[],morning_enabled:boolean,morning_time:string,evening_enabled:boolean,evening_time:string,changes_enabled:boolean,end_enabled:boolean,quiet_start:string|null,quiet_end:string|null,weekdays:number[],paused_until:string|null,theme:"auto"|"light"|"dark",sound:boolean,haptics:boolean,leaderboard_visible:boolean,nickname:string}. PUT /api/settings body Settings including version -> Settings. id/name response excludes sensitive fields beyond self.
+GET /api/search?q=... -> {items:Entity[]}; Entity {id:string,name:string,kind:"group"|"teacher",url:string}. Only accept canonical relative slugs.
+GET /api/schedule?entity=slug -> {entity:Entity,fetched_at:string,stale:boolean,template:true,lessons:Lesson[],current_week:1|2,timezone:string}; Lesson {id:string,week:1|2,weekday:number(0=Mon),number:number,title:string,kind:string,start:string(HH:mm),end:string,room:string,teachers:Entity[],groups:Entity[]}.
+GET /api/favorites -> {items:Entity[]}; PUT /api/favorites/{entity} {name,kind}; DELETE same. GET /api/recent -> {items:Entity[]}; DELETE /api/recent/{entity}.
+GET /api/notes?q=&kind=note|homework&offset=0&limit=30 -> {items:Note[]}; POST /api/notes {request_id:string(UUID, stable for create retries),title,text,kind:"note"|"homework",date:string|null,lesson_id:string|null,subject:string|null}; PUT /api/notes/{id} same + version,done:boolean; DELETE /api/notes/{id}?version=N. Note input additionally accepts source_entity:string|null (canonical public timetable slug). Note = supplied + {id:string,version:number,done:boolean,updated_at:string,lesson_status:"unlinked"|"unknown"|"current"|"changed"}. lesson_status is response-only and must never be sent to PUT. Source reference requires migration 0002_note_source; old rows remain null/unknown, never guessed. DELETE /api/me {confirmation:"DELETE"} removes account and revokes auth.
+Error shape all APIs {detail:string} or {detail:{message:string,code:string}}. Version conflicts 409, validation 422, auth 401, ownership absent 404, rate limit 429.
+
+## Games API/UI contracts
+Ids: slots,fishing,dice,darts,bowling,basketball,football,coin,roulette,blackjack,mines,wheel.
+GET /api/games/catalog -> {items:GameInfo[]}; GameInfo {id,title,description,rules:string[],min_bet,max_bet,payouts:Record<string,number>,probabilities:Record<string,number>}.
+GET /api/games/ledger?limit=30&offset=0 -> {items:{id,round_id,kind:"start_bonus"|"daily"|"bet"|"payout"|"fishing_sale"|"rod_upgrade",amount,balance_after,created_at}[]}; owner-only allowlist without raw idempotency keys.
+GET /api/games/wallet -> {balance:number,inventory_value:number,daily_available:boolean,rod_level:number}; GET /api/games/history -> {items:Round[]}.
+POST /api/games/daily {key:string} -> {balance:number,reward:number}; POST /api/games/fishing/upgrade {key} -> {balance,rod_level}; POST /api/games/fishing/sell {key} -> {balance,sold:number}; GET /api/games/fishing/inventory -> {items:{species:string,rarity:string,count:number,value:number,weight:number}[],rod_level:number}.
+POST /api/games/rounds {game:string,bet:number,choice?:string,mines?:number,key:string} -> Round.
+POST /api/games/rounds/{id}/actions {action:string,cell?:number,version:number,key:string} -> Round. Actions: blackjack hit/stand; mines reveal/cashout; fishing collect.
+GET /api/games/rounds/active -> {items:Round[]}; GET /api/games/rounds/{id} -> Round.
+Round {id:string,game:string,status:"active"|"won"|"lost"|"push"|"caught"|"expired",bet:number,payout:number,balance:number,version:number,created_at:string,available_at?:string|null,state:Record<string,unknown>,result:Record<string,unknown>|null}. State only public info: mines {cells:number[],values:Record<string,number>,mines_count:number,multiplier:number}; blackjack {player:string[],dealer:string[],player_total:number,dealer_total:number}; fishing {rod_level:number}. Results: slots {symbols:string[]}; dice {value:number}; darts {value:number}; bowling {value:number}; basketball/football {value:number,success:boolean}; coin {side:"heads"|"tails"}; roulette {number:number,color:"red"|"black"|"green"}; wheel {multiplier:number}; mines {mines:number[]}; blackjack final dealer cards; fishing {species:string,rarity:string,weight:number,value:number}. Symbols slots: cherry,lemon,bell,diamond,seven.
+GET /api/games/leaderboard?kind=wealth|fishing -> {items:{rank:number,nickname:string,score:number}[],self:{rank:number|null,score:number}}. No ID or group data.
+
+## Frontend integration
+Lead creates frontend/src/lib/api.ts exports api<T>(path:string,init?:RequestInit):Promise<T>, ApiError with status, api paths relative /api (use /games/wallet etc). Also exports mutationKey():string. Token in module memory only.
+Game UI default export Games from frontend/src/games/Games.tsx. Props {onBalanceChange?:(balance:number)=>void,sound:boolean,haptics:boolean,onSoundChange?:(enabled:boolean)=>void}. It owns own API types and state. No mock personal data/results. Own visuals actual Three.js (three dependency supplied by Lead), lucide-react icons and CSS. Can render self-contained game scene with low-quality/static fallback and reduced motion. Lazy mount scene and pause when document hidden. Web Audio unlock only user gesture, dispose nodes/canvas on unmount. Sound toggle receives prop; can offer enable user gesture. No external downloaded models needed: procedural geometry and authored sound graphs.
