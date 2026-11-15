@@ -22,6 +22,7 @@ from .security import now
 
 SOURCE = "https://timetable.magtu.ru"
 TZ = ZoneInfo(config.timezone)
+UNVIEWED = datetime(1970, 1, 1, tzinfo=timezone.utc)
 
 
 def canonical_slug(value: str) -> str:
@@ -184,7 +185,7 @@ async def search(query: str) -> list[dict]:
                 name = str(item["name"]).strip()[:200]
                 dto = {"id": slug, "name": name, "kind": item["type"], "url": SOURCE + "/" + quote(slug)}
                 items.append(dto)
-                await session.execute(insert(Entity).values(**dto, requested_at=datetime(1970, 1, 1, tzinfo=timezone.utc)).on_conflict_do_update(index_elements=[Entity.id], set_={"name": name, "kind": dto["kind"], "url": dto["url"]}))
+                await session.execute(insert(Entity).values(**dto, requested_at=UNVIEWED).on_conflict_do_update(index_elements=[Entity.id], set_={"name": name, "kind": dto["kind"], "url": dto["url"]}))
             await session.execute(insert(SearchCache).values(query=key, items=items, expires_at=now() + timedelta(minutes=5)).on_conflict_do_update(index_elements=[SearchCache.query], set_={"items": items, "expires_at": now() + timedelta(minutes=5)}))
             await session.commit()
         return items
@@ -277,7 +278,7 @@ async def parse_schedule(html: str, entity: dict) -> list[dict]:
     return sorted(output, key=lambda r: (r["week"], r["weekday"], r["start"], r["id"]))
 
 
-async def get_schedule(slug: str, force: bool = False) -> dict:
+async def get_schedule(slug: str, force: bool = False, *, mark_requested: bool = True) -> dict:
     slug = canonical_slug(slug)
     token = str(uuid4())
     async with async_session_factory() as session:
@@ -288,10 +289,14 @@ async def get_schedule(slug: str, force: bool = False) -> dict:
         snapshot = await session.get(Snapshot, slug)
         fresh = snapshot and (now() - snapshot.fetched_at).total_seconds() < config.source_ttl_seconds
         if fresh and not force:
-            await session.execute(update(Entity).where(Entity.id == slug).values(requested_at=now()))
+            if mark_requested:
+                await session.execute(update(Entity).where(Entity.id == slug).values(requested_at=now()))
             await session.commit()
             return schedule_dto(dto, snapshot)
-        claimed = (await session.execute(update(Entity).where(Entity.id == slug, (Entity.refresh_until.is_(None)) | (Entity.refresh_until < now())).values(refresh_token=token, refresh_until=now() + timedelta(minutes=10), requested_at=now()).returning(Entity.id))).scalar_one_or_none()
+        refresh_values = {"refresh_token": token, "refresh_until": now() + timedelta(minutes=10)}
+        if mark_requested:
+            refresh_values["requested_at"] = now()
+        claimed = (await session.execute(update(Entity).where(Entity.id == slug, (Entity.refresh_until.is_(None)) | (Entity.refresh_until < now())).values(**refresh_values).returning(Entity.id))).scalar_one_or_none()
         await session.commit()
     if claimed:
         try:
@@ -307,7 +312,7 @@ async def get_schedule(slug: str, force: bool = False) -> dict:
                     for related_id in sorted(related_entities):
                         linked = related_entities[related_id]
                         await session.execute(insert(Entity).values(
-                            id=linked["id"], name=linked["name"], kind=linked["kind"], url=linked["url"],
+                            id=linked["id"], name=linked["name"], kind=linked["kind"], url=linked["url"], requested_at=UNVIEWED,
                         ).on_conflict_do_nothing(index_elements=[Entity.id]))
                     current = await session.get(Snapshot, slug)
                     if current is None:

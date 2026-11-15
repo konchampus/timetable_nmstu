@@ -28,7 +28,7 @@ async def refresh_loop():
                 ).order_by(Snapshot.fetched_at.asc().nullsfirst(), Entity.id).limit(5))).scalars().all()
             for slug in ids:
                 try:
-                    await get_schedule(slug)
+                    await get_schedule(slug, mark_requested=False)
                 except HTTPException:
                     log.warning("Timetable refresh unavailable")
         except SQLAlchemyError as exc:
