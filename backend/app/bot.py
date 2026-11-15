@@ -17,10 +17,10 @@ from .accounts import lock_user, read_settings, save_settings
 from .config import config
 from .db import async_session_factory, engine
 from .models import BotInteraction, NotificationJob, Settings, Snapshot, User
-from .notifications import day_lessons, lesson_line, summary
 from .schemas import SettingsDTO
 from .security import now, rate_limit
 from .timetable import TZ, get_schedule, search
+from .telegram_navigation import navigate_schedule, show_schedule
 
 router = Router()
 
@@ -102,23 +102,14 @@ async def home_schedule(user_id: int) -> dict:
 async def timetable(message: Message, command: CommandObject):
     schedule = await home_schedule(message.from_user.id)
     local = now().astimezone(TZ)
-    if command.command == "next":
-        text = "В ближайшие 14 дней по шаблону занятий нет."
-        for offset in range(15):
-            day = local.date() + timedelta(days=offset)
-            candidates = [item for item in day_lessons(schedule["lessons"], day) if offset or item["start"] > local.strftime("%H:%M")]
-            if candidates:
-                nearest = [item for item in candidates if item["start"] == candidates[0]["start"]]
-                text = f'Следующая по опубликованному шаблону · {day:%d.%m}\n' + "\n".join(lesson_line(item) for item in nearest)
-                break
-    elif command.command == "week":
-        monday = local.date() - timedelta(days=local.weekday())
-        text = "\n\n".join(summary(schedule["lessons"], monday + timedelta(days=i)) for i in range(7))
-    else:
-        day = local.date() + timedelta(days=1 if command.command == "tomorrow" else 0)
-        text = summary(schedule["lessons"], day)
-    warning = "\n⚠ Кэш устарел; сведения могут быть неточными." if schedule["stale"] else ""
-    await answer_chunks(message, schedule["entity"]["name"] + "\n" + text + warning + "\nИсточник: " + schedule["entity"]["url"] + "\nПолучено: " + schedule["fetched_at"], reply_markup=app_keyboard())
+    mode = "next" if command.command == "next" else "week" if command.command == "week" else "day"
+    day = local.date() + timedelta(days=1 if command.command == "tomorrow" else 0)
+    await show_schedule(message.bot, message.from_user.id, message.chat.id, schedule, mode=mode, day=day, text_only=(command.args or "").strip().casefold() in ("list", "список"))
+
+
+@router.callback_query(F.data.startswith("sched:"))
+async def timetable_navigation(callback: CallbackQuery):
+    await navigate_schedule(callback)
 
 
 @router.message(Command("search"))
@@ -152,7 +143,9 @@ async def choose(callback: CallbackQuery):
         interaction = await session.get(BotInteraction, callback.from_user.id)
         if not interaction or interaction.key != key or interaction.expires_at < now():
             raise HTTPException(409, "Результаты устарели. Повторите /search")
-        items = interaction.data["items"]
+        items = interaction.data.get("items")
+        if not isinstance(items, list):
+            raise HTTPException(409, "Результаты устарели. Повторите /search")
         if not index.isdigit() or int(index) >= len(items):
             raise HTTPException(422, "Неверный выбор")
         entity = items[int(index)]
@@ -163,8 +156,7 @@ async def choose(callback: CallbackQuery):
             await save_settings(session, callback.from_user.id, SettingsDTO(**values), trusted_bot=True)
     await callback.answer("Группа сохранена" if action == "home" else "Загружаю")
     schedule = await get_schedule(entity["id"])
-    text = summary(schedule["lessons"], now().astimezone(TZ).date())
-    await answer_chunks(callback.message, entity["name"] + "\n" + text + ("\n⚠ Устаревший кэш" if schedule["stale"] else ""), reply_markup=app_keyboard())
+    await show_schedule(callback.bot, callback.from_user.id, callback.message.chat.id, schedule)
 
 
 SETTINGS_HELP = (

@@ -8,15 +8,17 @@ from sqlalchemy.dialects.postgresql import insert
 from .accounts import settings_dto
 from .config import config
 from .db import async_session_factory
-from .models import NotificationCursor, NotificationJob, Settings, Snapshot, User
+from .models import Entity, NotificationCursor, NotificationJob, Settings, Snapshot, User
 from .schemas import SettingsDTO
 from .security import now
-from .timetable import TZ, week_at
+from .timetable import TZ, entity_dto, week_at
+from .telegram_delivery import send_document
+from .telegram_schedule import Section, day_label, documents, lesson_view
 
 
 def day_lessons(lessons: list[dict], day: date) -> list[dict]:
     moment = datetime.combine(day, time(12), TZ)
-    return [item for item in lessons if item["week"] == week_at(moment) and item["weekday"] == day.weekday()]
+    return sorted((item for item in lessons if item["week"] == week_at(moment) and item["weekday"] == day.weekday()), key=lambda item: (item["start"], item["number"], item["title"]))
 
 
 def at(day: date, clock: str) -> datetime:
@@ -60,16 +62,25 @@ def summary(lessons: list[dict], day: date) -> str:
     return f'{day:%d.%m.%Y} · расчёт по двухнедельному шаблону\n' + ("\n".join(lesson_line(item) for item in selected) if selected else "По шаблону занятий нет.")
 
 
-async def enqueue(session, user: User, settings: SettingsDTO, snapshot: Snapshot, category: str, event: str, due: datetime, text: str, expires: datetime | None = None):
+async def enqueue(session, user: User, settings: SettingsDTO, snapshot: Snapshot, category: str, event: str, due: datetime, text: str, expires: datetime | None = None, *, presentation: list[dict] | None = None):
     if due < now() or (category != "changes" and not permitted(settings, due)):
         return
     key = hashlib.sha256(f"{user.id}:{settings.version}:{settings.home_entity}:{snapshot.content_hash}:{category}:{event}:{due.isoformat()}".encode()).hexdigest()
-    await session.execute(insert(NotificationJob).values(
-        id=str(uuid4()), user_id=user.id, dedupe=key, entity_id=settings.home_entity,
-        snapshot_hash=snapshot.content_hash, settings_version=settings.version, category=category,
-        payload={"text": text[:3400] + ("\nПолное расписание — в приложении." if len(text) > 3400 else "")},
-        due_at=due, expires_at=expires or due + timedelta(seconds=90), status="pending",
-    ).on_conflict_do_nothing(index_elements=[NotificationJob.dedupe]))
+    pages = presentation or [None]
+    if len(pages) > 1:
+        previous = await session.scalar(select(NotificationJob.payload).where(NotificationJob.dedupe == key))
+        if previous is not None and "document" not in previous:
+            # Do not append new pages to an already queued legacy whole event.
+            return
+    for index, document in enumerate(pages):
+        page_key = key if index == 0 else hashlib.sha256(f"{key}:page:{index}".encode()).hexdigest()
+        payload = {"text": document["fallback"]["text"], "document": document} if document else {"text": text[:3400] + ("\nПолное расписание — /today или /week." if len(text) > 3400 else "")}
+        await session.execute(insert(NotificationJob).values(
+            id=str(uuid4()), user_id=user.id, dedupe=page_key, entity_id=settings.home_entity,
+            snapshot_hash=snapshot.content_hash, settings_version=settings.version, category=category,
+            payload=payload, due_at=due + timedelta(seconds=index),
+            expires_at=expires or due + timedelta(seconds=90), status="pending",
+        ).on_conflict_do_nothing(index_elements=[NotificationJob.dedupe]))
 
 
 async def plan_user(user_id: int):
@@ -86,6 +97,18 @@ async def plan_user(user_id: int):
         snapshot = await session.get(Snapshot, settings.home_entity)
         if not snapshot or (now() - snapshot.fetched_at).total_seconds() > config.source_max_age_seconds:
             return
+        entity = await session.get(Entity, settings.home_entity)
+        if entity is None:
+            return
+        schedule = {"entity": entity_dto(entity), "lessons": snapshot.lessons, "fetched_at": snapshot.fetched_at.isoformat(), "stale": False}
+
+        def notice(title, target, items, due, *, introduction=None, following=None):
+            sections = [Section(day_label(target), target, [lesson_view(item, target, schedule, due) for item in items], introduction)]
+            if following is not None:
+                next_day, next_items = following
+                sections.append(Section("Следующая · " + day_label(next_day), next_day, [lesson_view(item, next_day, schedule, due) for item in next_items]))
+            return documents(schedule, "notice", target, due, title_override=title, sections_override=sections)
+
         cursor = await session.get(NotificationCursor, user.id)
         if cursor is None:
             cursor = NotificationCursor(user_id=user.id, entity_id=settings.home_entity, content_hash=snapshot.content_hash, settings_version=settings.version)
@@ -99,35 +122,35 @@ async def plan_user(user_id: int):
                     # Only the latest summary survives a quiet-hours change burst.
                     await session.execute(delete(NotificationJob).where(NotificationJob.user_id == user.id, NotificationJob.category == "changes", NotificationJob.status == "pending"))
                     await enqueue(session, user, settings, snapshot, "changes", snapshot.content_hash, due,
-                                  "Изменён шаблон расписания домашней группы. Это не подтверждённая замена на конкретную дату.\nОткройте расписание для просмотра актуального шаблона.", due + timedelta(hours=24))
+                                  "Изменён шаблон расписания домашней группы. Это не подтверждённая замена на конкретную дату.\nОткройте /today или /week для просмотра.", due + timedelta(hours=24), presentation=notice("Расписание обновилось", due.astimezone(TZ).date(), [], due, introduction="Изменился опубликованный шаблон домашней группы. Это не подтверждённая замена на конкретную дату. Откройте /today или /week для просмотра."))
             cursor.content_hash = snapshot.content_hash
         today = now().astimezone(TZ).date()
         for day in (today, today + timedelta(days=1)):
             lessons = day_lessons(snapshot.lessons, day)
             if settings.morning_enabled:
-                await enqueue(session, user, settings, snapshot, "morning", str(day), at(day, settings.morning_time), "Расписание на сегодня\n" + summary(snapshot.lessons, day))
+                await enqueue(session, user, settings, snapshot, "morning", str(day), at(day, settings.morning_time), "Расписание на сегодня\n" + summary(snapshot.lessons, day), presentation=documents(schedule, "day", day, at(day, settings.morning_time), title_override="Утреннее расписание"))
             if settings.evening_enabled:
-                await enqueue(session, user, settings, snapshot, "evening", str(day), at(day, settings.evening_time), "Расписание на завтра\n" + summary(snapshot.lessons, day + timedelta(days=1)))
+                await enqueue(session, user, settings, snapshot, "evening", str(day), at(day, settings.evening_time), "Расписание на завтра\n" + summary(snapshot.lessons, day + timedelta(days=1)), presentation=documents(schedule, "day", day + timedelta(days=1), at(day, settings.evening_time), title_override="Завтра · расписание"))
             for item in lessons:
                 for minutes in settings.before_minutes:
                     start = at(day, item["start"])
-                    await enqueue(session, user, settings, snapshot, "before", f'{day}:{item["id"]}:{minutes}', start - timedelta(minutes=minutes), f'Через {minutes} мин по опубликованному расписанию:\n' + lesson_line(item), min(start, start - timedelta(minutes=minutes) + timedelta(seconds=90)))
+                    await enqueue(session, user, settings, snapshot, "before", f'{day}:{item["id"]}:{minutes}', start - timedelta(minutes=minutes), f'Через {minutes} мин по опубликованному расписанию:\n' + lesson_line(item), min(start, start - timedelta(minutes=minutes) + timedelta(seconds=90)), presentation=notice(f"Скоро пара · через {minutes} мин", day, [item], start - timedelta(minutes=minutes)))
                 if settings.end_enabled:
                     end = at(day, item["end"])
                     future = [other for other in lessons if other["start"] >= item["end"]]
+                    nearest, next_day = [], day
                     if future:
                         nearest = [other for other in future if other["start"] == future[0]["start"]]
-                        next_text = "\nСледующая (параллельные варианты сохранены):\n" + "\n".join(lesson_line(other) for other in nearest)
                     else:
-                        next_text = "\nВ ближайшие 14 дней по шаблону занятий нет."
                         for offset in range(1, 15):
                             next_day = day + timedelta(days=offset)
                             next_lessons = day_lessons(snapshot.lessons, next_day)
                             if next_lessons:
                                 nearest = [other for other in next_lessons if other["start"] == next_lessons[0]["start"]]
-                                next_text = f"\nБлижайшая · {next_day:%d.%m}:\n" + "\n".join(lesson_line(other) for other in nearest)
                                 break
-                    await enqueue(session, user, settings, snapshot, "end", f'{day}:{item["id"]}', end, "По шаблону закончилась пара:\n" + lesson_line(item) + next_text)
+                    next_text = "\nВ ближайшие 14 дней по шаблону занятий нет." if not nearest else f"\nСледующая · {next_day:%d.%m}:\n" + "\n".join(lesson_line(other) for other in nearest)
+                    presentation = notice("Пара закончилась по шаблону", day, [item], end, introduction="После этой пары в ближайшие 14 дней по шаблону занятий нет." if not nearest else None, following=(next_day, nearest) if nearest else None)
+                    await enqueue(session, user, settings, snapshot, "end", f'{day}:{item["id"]}', end, "По шаблону закончилась пара:\n" + lesson_line(item) + next_text, presentation=presentation)
         await session.commit()
 
 
@@ -179,14 +202,17 @@ async def deliver(bot: Bot, job_id: str, token: str):
             job.status = "cancelled"
             await session.commit()
             return
-        text, recipient = job.payload["text"], user.id
+        text, recipient, document = job.payload["text"], user.id, job.payload.get("document")
         account_generation = user.account_generation
         job.status = "sending"
         job.attempts += 1
         job.lease_until = func.clock_timestamp() + timedelta(seconds=90)
         await session.commit()
     try:
-        await bot.send_message(recipient, text, parse_mode=None, request_timeout=30)
+        if isinstance(document, dict) and document.get("version") == 1:
+            await send_document(bot, recipient, document)
+        else:
+            await bot.send_message(recipient, text, parse_mode=None, request_timeout=30)
     except TelegramRetryAfter as exc:
         await finish(job_id, token, "pending", "telegram_429", max(1, exc.retry_after))
     except TelegramForbiddenError:
