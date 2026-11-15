@@ -237,13 +237,20 @@ async def parse_schedule(html: str, entity: dict) -> list[dict]:
                     href, name = source_slug(link["href"]), clean(link)
                     key = (href, related_kind)
                     if key not in links:
-                        # Source display links (e.g. surname with dots) are not canonical IDs.
-                        candidates = await search(name)
-                        normalize = lambda s: re.sub(r"[\s._()/-]", "", s).casefold()
-                        matches = [item for item in candidates if item["kind"] == related_kind and (item["id"] == href or normalize(item["name"]) == normalize(name))]
-                        if len(matches) != 1:
-                            raise ValueError("ambiguous linked entity")
-                        links[key] = matches[0]
+                        if related_kind == "group" and re.fullmatch(r"[\w.–—-]+_\d+", href):
+                            # Teacher pages label groups "(1 п/г)", while the public
+                            # search uses "(1 подгр.)" and does not search those labels.
+                            # The source already provides an unambiguous canonical URL.
+                            group_name = re.sub(r"\(\s*(\d+)\s*п\s*/\s*г\s*\)", r"(\1 подгр.)", name, flags=re.I)
+                            links[key] = {"id": href, "name": group_name, "kind": "group", "url": SOURCE + "/" + quote(href)}
+                        else:
+                            # Display teacher links (surname with dots) are aliases.
+                            candidates = await search(name)
+                            normalize = lambda s: re.sub(r"[\s._()/-]", "", s).casefold()
+                            matches = [item for item in candidates if item["kind"] == related_kind and (item["id"] == href or normalize(item["name"]) == normalize(name))]
+                            if len(matches) != 1:
+                                raise ValueError("ambiguous linked entity")
+                            links[key] = matches[0]
                     related.append(links[key])
                 record = {"week": week, "weekday": weekday, "number": int(number), "title": title, "kind": " ".join(kind.split()), "start": start, "end": end, "room": room,
                           "teachers": related if entity["kind"] == "group" else [entity], "groups": [entity] if entity["kind"] == "group" else related}
@@ -294,6 +301,14 @@ async def get_schedule(slug: str, force: bool = False) -> dict:
             async with async_session_factory() as session:
                 entity = (await session.execute(select(Entity).where(Entity.id == slug).with_for_update())).scalar_one()
                 if entity.refresh_token == token and entity.refresh_until > now():
+                    # Register validated canonical related links atomically with
+                    # publication, so clicking a group from a teacher page works.
+                    related_entities = {linked["id"]: linked for lesson in lessons for field in ("teachers", "groups") for linked in lesson[field] if linked["id"] != slug}
+                    for related_id in sorted(related_entities):
+                        linked = related_entities[related_id]
+                        await session.execute(insert(Entity).values(
+                            id=linked["id"], name=linked["name"], kind=linked["kind"], url=linked["url"],
+                        ).on_conflict_do_nothing(index_elements=[Entity.id]))
                     current = await session.get(Snapshot, slug)
                     if current is None:
                         session.add(Snapshot(entity_id=slug, lessons=lessons, content_hash=digest, fetched_at=now(), changed_at=now()))
