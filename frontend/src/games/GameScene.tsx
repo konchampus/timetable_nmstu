@@ -63,7 +63,7 @@ export default function GameScene({ game, round, info, lowPower }: Props) {
       const group = new THREE.Group(); group.position.set(x,y,z); parent.add(group);
       const body = sphere(group,0,0,0,0.23,color); body.scale.set(1.8,0.8,0.65);
       const tail = mesh(new THREE.ConeGeometry(0.21,0.35,3),color,group,-0.46,0,0); tail.rotation.z = -Math.PI/2;
-      sphere(group,0.23,0.07,0.12,0.035,INK); return group;
+      const finColor=new THREE.Color(color).multiplyScalar(0.76).getHex();const dorsal=mesh(new THREE.ConeGeometry(.105,.24,4),finColor,group,-.03,.2,0);dorsal.rotation.z=Math.PI;mesh(new THREE.ConeGeometry(.075,.18,4),finColor,group,.22,-.12,0);sphere(group,.23,.07,.12,.035,INK);const eyeShine=sphere(group,.244,.085,.15,.011,WHITE);eyeShine.scale.setScalar(.54);return group;
     }
     try {
       renderer = new THREE.WebGLRenderer({alpha:true,antialias:!lowPower,powerPreference:'low-power'});
@@ -78,24 +78,19 @@ export default function GameScene({ game, round, info, lowPower }: Props) {
       const pedestal = mesh(new THREE.CylinderGeometry(2.55,2.7,0.18,64),0xe0e3f4,root,0,-0.8,0);
       if (game === 'fishing') {
         camera.position.set(5,5.3,7.7); camera.lookAt(0,0,0); pedestal.visible = false;
-        const water = mesh(new THREE.CylinderGeometry(3,3,0.3,72),0x76abc5,root,0,-0.5,0);
-        (water.material as THREE.MeshStandardMaterial).roughness = 0.22;
-        mesh(new THREE.CylinderGeometry(1.1,1.25,0.45,14),0xc4b29a,root,-1.6,-0.15,-0.5);
-        mesh(new THREE.CylinderGeometry(1.08,1.08,0.1,14),0x829c7a,root,-1.6,0.13,-0.5);
-        for (let index=0;index<3;index++) {
-          const x=-2.1+index*0.43, z=-0.85+(index%2)*0.8;
-          mesh(new THREE.CylinderGeometry(0.06,0.09,0.7,7),0x817266,root,x,0.5,z);
-          mesh(new THREE.ConeGeometry(0.4,1.1,7),index===1?0x648b7b:0x759b86,root,x,1.15,z);
-        }
-        for (let i=0;i<5;i++) box(root,-0.65+i*0.22,0.02,0.05,0.18,0.09,0.65,0xa08670);
-        const rod = mesh(new THREE.CylinderGeometry(0.025,0.045,1.9,8),INK,root,-0.35,0.8,0.1); rod.rotation.z=-0.7;
-        const bobber = new THREE.Group(); bobber.position.set(0.9,-0.15,0.4); root.add(bobber);
-        sphere(bobber,0,0,0,0.11,0xf3ede4); sphere(bobber,0,0.09,0,0.07,0xd77676);
-        const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0.25,1.53,0.1),new THREE.Vector3(0.9,-0.1,0.4)]),new THREE.LineBasicMaterial({color:INK})); root.add(line);
-        const ripple = ring(root,0.26,0.012,0xcdeaf1,0.9,-0.32,0.4); ripple.rotation.x=-Math.PI/2;
-        const swimmer = fish(root,1.25,-0.35,-0.7,0x547d9c);
-        if (settled && round?.status === 'caught') { const catchFish = fish(root,0.9,0.55,0.4,GOLD); animated.push((t,p)=>{ catchFish.position.y=0.15+p*0.7+Math.sin(t*5)*0.035; catchFish.rotation.z=Math.sin(t*8)*0.08; }); }
-        animated.push((t)=>{ bobber.position.y=-0.15+Math.sin(t*2.5)*0.045; ripple.scale.setScalar(1+(t%2)*0.35); swimmer.position.x=1.1+Math.sin(t*0.45)*0.65; swimmer.rotation.y=Math.cos(t*0.45)*0.3; });
+        const water = mesh(new THREE.PlaneGeometry(9,7,1,1),0x47a8ad,root,0,-0.63,-1.65);water.rotation.x=-Math.PI/2;(water.material as THREE.MeshStandardMaterial).roughness=0.38;
+        const shore=box(root,0,-0.34,-4.7,9,0.8,1,0xd3c5ad);shore.rotation.x=-0.12;
+        const farBank=box(root,0,-0.14,-4.05,8,0.46,.7,0x82917a);
+        for(let i=0;i<9;i++){const x=-3.55+i*.9,height=.8+(i*7%5)*.18;const rock=mesh(new THREE.ConeGeometry(.45+((i+1)%3)*.12,height,5),i%3===0?0x748897:i%3===1?0x99a4a9:0x78877d,root,x,-.1+height/2,-3.78);rock.rotation.z=(i%2?.1:-.1);}
+        for(let i=0;i<6;i++){const x=-3.1+i*.25,base=i%2?.23:.05;const reed=mesh(new THREE.CylinderGeometry(.018,.032,.55+i%3*.13,5),0x658d68,root,x,-.37+(0.55+i%3*.13)/2,.8+i%3*.18);reed.rotation.z=(i-2.5)*.105;const seed=mesh(new THREE.CapsuleGeometry(.055,.14,3,5),0x987b52,root,x,-.04+base,.82+i%3*.18);seed.rotation.z=.12;}
+        for(let i=0;i<5;i++)box(root,-.85+i*.22,-.22,.32,.16,.18,.62,i%2?0x9a765a:0x82624f);
+        const rodGroup=new THREE.Group();root.add(rodGroup);const rod=mesh(new THREE.CylinderGeometry(.022,.045,2.5,9),0x845d40,rodGroup,-.7,1.04,.38);rod.rotation.z=-.52;mesh(new THREE.CylinderGeometry(.11,.095,.38,12),0x343b42,rodGroup,-.1,.56,.4).rotation.z=-.52;const grip=mesh(new THREE.CylinderGeometry(.07,.09,.48,10),0xbd8b55,rodGroup,-.28,.78,.38);grip.rotation.z=-.52;
+        const bobber = new THREE.Group(); bobber.position.set(.92,-.19,.48); root.add(bobber);sphere(bobber,0,0,0,.13,0xf3ede4);sphere(bobber,0,.09,0,.085,0xd77676);mesh(new THREE.CylinderGeometry(.008,.008,.13,5),INK,bobber,0,.19,0);
+        const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(.55,2.03,.38),new THREE.Vector3(.92,-.1,.48)]),new THREE.LineBasicMaterial({color:0xe8eee6}));root.add(line);
+        const ripple=ring(root,.3,.012,0xd9f0e9,.92,-.56,.48);ripple.rotation.x=-Math.PI/2;
+        const rippleTwo=ring(root,.49,.009,0xcdeaf1,.92,-.555,.48);rippleTwo.rotation.x=-Math.PI/2;
+        const swimmer=fish(root,1.42,-.48,-.45,0x547d9c);const catchSpecies=stringValue(result,'species'),catchRarity=stringValue(result,'rarity');const fishColors:Record<string,number>={common:0x91a8a2,uncommon:0x849562,rare:0x5d98a1,epic:0x9c78ad,legendary:GOLD};const catchSilhouette:Record<string,number>={'Плотва':1,'Карась':1.12,'Щука':1.52,'Сом':1.23,'Золотая рыба':.92};const catchingFish=settled&&round?.status==='caught'?fish(root,.92,.12,.48,fishColors[catchRarity]??0x91a8a2):null;if(catchingFish){catchingFish.visible=false;catchingFish.scale.x=catchSilhouette[catchSpecies]??1;}
+        animated.push((t,p)=>{const after=!!round?.available_at&&Date.now()>=Date.parse(round.available_at);const bite=after?0.095*Math.max(0,Math.sin(t*8)):0;bobber.position.y=-.19+Math.sin(t*1.8)*.035-bite;if(catchingFish){catchingFish.visible=p>.08;catchingFish.position.y=.12+p*.62+Math.sin(t*4)*.025;catchingFish.rotation.z=Math.sin(t*5)*.045;}ripple.scale.setScalar(.8+(t%2.8)*.33);rippleTwo.scale.setScalar(.8+((t+1.35)%2.8)*.33);swimmer.position.x=1.3+Math.sin(t*.38)*.72;swimmer.rotation.y=Math.cos(t*.38)*.24;rodGroup.rotation.z=after?Math.sin(t*8)*.012:Math.sin(t*1.3)*.009;});
       } else if (game === 'slots') {
         box(root,0,0.65,0,3.9,2.65,0.8,INK); box(root,0,0.65,0.46,3.55,1.65,0.16,0xc7cbed);
         const symbols = strings(result?.symbols); const sequence = ['cherry','lemon','bell','diamond','seven'];
