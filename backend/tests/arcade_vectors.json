@@ -1,0 +1,338 @@
+[
+  {
+    "game": "darts",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": -85,
+      "target_x": 120,
+      "target_y": -70
+    },
+    "shot": {
+      "aim_x": 205,
+      "aim_y": -70,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "value": 50,
+      "impact_x": 120,
+      "impact_y": -70,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "darts",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 120,
+      "target_x": -300,
+      "target_y": 180
+    },
+    "shot": {
+      "aim_x": -420,
+      "aim_y": 180,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "value": 50,
+      "impact_x": -300,
+      "impact_y": 180,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "darts",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 0,
+      "target_x": 0,
+      "target_y": 0
+    },
+    "shot": {
+      "aim_x": 1000,
+      "aim_y": -1000,
+      "power": 100,
+      "ticks": 150
+    },
+    "result": {
+      "value": 0,
+      "impact_x": 1000,
+      "impact_y": -2100,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "darts",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 17,
+      "target_x": 34,
+      "target_y": -59
+    },
+    "shot": {
+      "aim_x": -145,
+      "aim_y": 331,
+      "power": 811,
+      "ticks": 150
+    },
+    "result": {
+      "value": 0,
+      "impact_x": -128,
+      "impact_y": 653,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "bowling",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": -85,
+      "target_x": 120,
+      "target_y": -70
+    },
+    "shot": {
+      "aim_x": 205,
+      "aim_y": -70,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "value": 8,
+      "impact_x": 120,
+      "impact_y": -70,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "bowling",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 120,
+      "target_x": -300,
+      "target_y": 180
+    },
+    "shot": {
+      "aim_x": -420,
+      "aim_y": 180,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "value": 8,
+      "impact_x": -300,
+      "impact_y": 180,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "bowling",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 0,
+      "target_x": 0,
+      "target_y": 0
+    },
+    "shot": {
+      "aim_x": 1000,
+      "aim_y": -1000,
+      "power": 100,
+      "ticks": 150
+    },
+    "result": {
+      "value": 0,
+      "impact_x": 1000,
+      "impact_y": -2100,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "bowling",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 17,
+      "target_x": 34,
+      "target_y": -59
+    },
+    "shot": {
+      "aim_x": -145,
+      "aim_y": 331,
+      "power": 811,
+      "ticks": 150
+    },
+    "result": {
+      "value": 0,
+      "impact_x": -128,
+      "impact_y": 653,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "basketball",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": -85,
+      "target_x": 120,
+      "target_y": -70
+    },
+    "shot": {
+      "aim_x": 205,
+      "aim_y": -70,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "success": true,
+      "impact_x": 120,
+      "impact_y": -70,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "basketball",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 120,
+      "target_x": -300,
+      "target_y": 180
+    },
+    "shot": {
+      "aim_x": -420,
+      "aim_y": 180,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "success": true,
+      "impact_x": -300,
+      "impact_y": 180,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "basketball",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 0,
+      "target_x": 0,
+      "target_y": 0
+    },
+    "shot": {
+      "aim_x": 1000,
+      "aim_y": -1000,
+      "power": 100,
+      "ticks": 150
+    },
+    "result": {
+      "success": false,
+      "impact_x": 1000,
+      "impact_y": -2100,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "basketball",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 17,
+      "target_x": 34,
+      "target_y": -59
+    },
+    "shot": {
+      "aim_x": -145,
+      "aim_y": 331,
+      "power": 811,
+      "ticks": 150
+    },
+    "result": {
+      "success": false,
+      "impact_x": -128,
+      "impact_y": 653,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "football",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": -85,
+      "target_x": 120,
+      "target_y": -70
+    },
+    "shot": {
+      "aim_x": 205,
+      "aim_y": -70,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "success": true,
+      "impact_x": 120,
+      "impact_y": -70,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "football",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 120,
+      "target_x": -300,
+      "target_y": 180
+    },
+    "shot": {
+      "aim_x": -420,
+      "aim_y": 180,
+      "power": 650,
+      "ticks": 150
+    },
+    "result": {
+      "success": true,
+      "impact_x": -300,
+      "impact_y": 180,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "football",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 0,
+      "target_x": 0,
+      "target_y": 0
+    },
+    "shot": {
+      "aim_x": 1000,
+      "aim_y": -1000,
+      "power": 100,
+      "ticks": 150
+    },
+    "result": {
+      "success": false,
+      "impact_x": 1000,
+      "impact_y": -2100,
+      "gameplay_version": 1
+    }
+  },
+  {
+    "game": "football",
+    "challenge": {
+      "gameplay_version": 1,
+      "wind": 17,
+      "target_x": 34,
+      "target_y": -59
+    },
+    "shot": {
+      "aim_x": -145,
+      "aim_y": 331,
+      "power": 811,
+      "ticks": 150
+    },
+    "result": {
+      "success": false,
+      "impact_x": -128,
+      "impact_y": 653,
+      "gameplay_version": 1
+    }
+  }
+]

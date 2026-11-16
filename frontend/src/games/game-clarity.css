@@ -1,0 +1,126 @@
+/* UI/UX Pro Max: task-first hierarchy, progressive disclosure, 44px targets.
+   Existing app palette stays authoritative; no marketing funnel or forced tour. */
+.games [hidden] { display: none !important; }
+.game-guide { margin: 0 0 24px; padding: 0 0 20px; border-bottom: 1px solid var(--games-line); }
+.game-guide-purpose { display: flex; gap: 12px; align-items: flex-start; color: var(--games-ink); }
+.game-guide-purpose > svg { color: var(--games-accent); margin-top: 3px; flex-shrink: 0; }
+.game-guide-purpose > p { font-size: 17px; line-height: 1.5; font-weight: 650; max-width: 70ch; text-wrap: pretty; }
+.game-next-action { display: flex; align-items: flex-start; gap: 9px; margin-top: 12px; font-size: 14px; line-height: 1.6; color: var(--games-muted); }
+.game-next-action svg { margin-top: 3px; }
+.game-instructions > summary { display: flex; align-items: center; gap: 10px; min-height: 44px; width: fit-content; cursor: pointer; color: var(--games-accent); font-weight: 650; font-size: 13px; list-style: none; }
+.game-instructions > summary::-webkit-details-marker { display: none; }
+.game-instructions[open] > summary svg { transform: rotate(180deg); }
+.game-instructions > ol { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 24px; list-style: none; padding: 8px 0 12px; margin: 0; }
+.game-instructions li { display: flex; gap: 10px; align-items: start; }
+.game-instructions li > span { display: grid; place-items: center; min-width: 26px; height: 26px; border-radius: 8px; color: var(--games-accent); background: var(--games-soft); font-size: 12px; font-weight: 700; }
+.game-instructions li > p { color: var(--games-ink); font-size: 13px; line-height: 1.65; padding-top: 2px; }
+.game-control-explainer { display: flex; gap: 8px; align-items: start; color: var(--games-muted); font-size: 12px; line-height: 1.65; padding: 12px 0 0; max-width: 85ch; }
+.game-control-explainer svg { margin-top: 3px; }
+.game-round-explanation { display: flex; align-items: start; gap: 9px; margin-top: 12px !important; font-size: 13px; color: var(--games-muted); line-height: 1.6; }
+.game-round-explanation svg { margin-top: 2px; }
+.game-board-stage { padding: 28px; border-radius: 18px; background: var(--games-bg); border: 1px solid var(--games-line); min-height: 350px; }
+.game-board-stage > h3 { font-size: 19px; margin-bottom: 12px; }
+.games .game-board-stage .games-card-table { padding-top: 12px; }
+.games .game-board-stage .games-card { width: 80px; height: 116px; }
+.games .game-board-stage .games-minefield { max-width: 480px; }
+.game-board-stage .games-hand-heading { font-size: 14px; }
+.games .game-board-stage .games-minefield button { min-height: 44px; }
+.game-active-hint { font-size: 14px; line-height: 1.65; color: var(--games-ink); padding-bottom: 16px; }
+.game-start-cost { padding: 10px 12px; border-radius: 8px; background: var(--games-panel); color: var(--games-muted); font-size: 12px; line-height: 1.65; }
+.game-start-cost strong { color: var(--games-ink); }
+.game-bet-error { color: var(--games-danger); font-size: 12px; line-height: 1.55; }
+.fishing-expedition { padding: 24px; border-bottom: 1px solid var(--games-line); }
+.fishing-trip-heading { display: flex; justify-content: space-between; gap: 16px; align-items: start; margin-bottom: 18px; }
+.fishing-trip-heading h3 { font-size: 22px; letter-spacing: -.025em; }
+.fishing-trip-heading p { color: var(--games-muted); font-size: 13px; line-height: 1.65; margin-top: 6px; }
+.fishing-trip-heading > span { flex-shrink: 0; font-size: 12px; color: var(--games-accent); padding-top: 4px; font-weight: 650; }
+.fishing-destinations { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+.fishing-destination { display: flex; flex-direction: column; gap: 7px; min-width: 0; padding: 10px 10px 14px; border: 1px solid var(--games-line); border-radius: 12px; background: var(--games-bg); color: var(--games-ink); text-align: left; }
+.fishing-destination[aria-pressed=true] { border-color: var(--games-accent); box-shadow: inset 0 0 0 1px var(--games-accent); }
+.games .fishing-destination:disabled { opacity: 1; cursor: not-allowed; }
+.games .fishing-destination[aria-pressed=true]:disabled { opacity: 1; }
+.destination-landscape { display: flex; align-items: center; justify-content: space-between; width: 100%; height: 70px; padding: 14px; border-radius: 7px; background: #d7e9e5; color: #2e6257; }
+.destination-river .destination-landscape { background: #d6e7ee; color: #286179; }
+.destination-mountain .destination-landscape { background: #dfe4f1; color: #42577d; }
+.destination-golden .destination-landscape { background: #f4e6c9; color: #785517; }
+.fishing-destination > strong { font-size: 14px; line-height: 1.4; margin-top: 3px; }
+.fishing-destination > span:not(.destination-landscape) { font-size: 11px; line-height: 1.5; color: var(--games-muted); }
+.fishing-destination > b { font-size: 11px; line-height: 1.5; font-weight: 600; margin-top: auto; }
+.fishing-destination.is-preview:not([aria-pressed=true]) { border-color: var(--games-accent); border-style: dashed; }
+.fishing-destination > .destination-theme { color: var(--games-ink) !important; font-size: 11px; line-height: 1.55; }
+.fishing-destination-detail { padding: 16px 0 4px; }
+.fishing-locked-preview { display: flex; gap: 10px; align-items: flex-start; padding: 14px; margin-bottom: 14px; border-radius: 10px; background: var(--games-panel); color: var(--games-ink); }
+.fishing-locked-preview svg { margin-top: 3px; }
+.fishing-locked-preview p { font-size: 13px; line-height: 1.6; }
+.fishing-lore { margin-top: 8px; padding: 8px 0; }
+.fishing-lore summary { width: 100%; }
+.fishing-lore summary > span { min-width: 0; }
+.fishing-destination-detail .fishing-lore > p { font-size: 14px; line-height: 1.75; max-width: 70ch; text-wrap: pretty; }
+.fishing-destination-detail .fishing-lore > .fishing-landmark,
+.fishing-destination-detail .fishing-lore > .fishing-story-fish { font-size: 12px; margin-top: 10px; color: var(--games-muted); }
+.fishing-destination-detail > p { font-size: 13px; line-height: 1.6; color: var(--games-muted); }
+.fishing-destination-detail summary { list-style: none; display: flex; align-items: center; gap: 8px; width: fit-content; min-height: 44px; font-size: 13px; color: var(--games-accent); font-weight: 650; cursor: pointer; }
+.fishing-destination-detail summary::-webkit-details-marker { display: none; }
+.fishing-destination-detail details[open] summary svg { transform: rotate(180deg); }
+.fishing-destination-detail details > p { font-size: 12px; color: var(--games-muted); line-height: 1.6; margin-bottom: 12px; }
+.fishing-pool { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 0 24px; }
+.fishing-pool > div { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--games-line); font-size: 12px; }
+.fishing-pool > div > span { display: flex; flex-direction: column; gap: 5px; }
+.fishing-pool > div > span:last-child { text-align: right; }
+.fishing-pool small { font-size: 11px; color: var(--games-muted); }
+.fishing-skins { border: 0; padding: 0; margin: 18px 0 0; min-width: 0; }
+.fishing-skins legend { font-size: 14px; font-weight: 650; margin-bottom: 12px; }
+.fishing-skins legend > span { margin-left: 12px; font-weight: 400; font-size: 12px; color: var(--games-muted); }
+.fishing-skins > div { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.fishing-skins label { position: relative; min-width: 0; }
+.fishing-skins input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.fishing-skins label > span { display: flex; align-items: center; gap: 12px; min-height: 68px; padding: 12px 14px; border: 1px solid var(--games-line); border-radius: 10px; cursor: pointer; }
+.fishing-skins label > span > span { display: grid; gap: 4px; flex: 1; }
+.fishing-skins strong { font-size: 14px; }
+.fishing-skins small { font-size: 11px; color: var(--games-muted); }
+.fishing-skins input:checked + span { border-color: var(--games-accent); background: var(--games-soft); }
+.fishing-skins input:disabled + span { opacity: 1; cursor: not-allowed; }
+.fishing-skins input:checked:disabled + span { opacity: 1; }
+.fishing-skins input:focus-visible + span { outline: 3px solid var(--games-accent); outline-offset: 3px; }
+.fishing-selection-note, .fishing-world-unavailable { font-size: 12px; line-height: 1.65; color: var(--games-muted); margin-top: 16px !important; }
+.fishing-world-unavailable { padding: 16px 24px; }
+.fishing-phase-steps { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin: 0; padding: 16px 24px; list-style: none; background: var(--soft,#f2f5fa); border-bottom: 1px solid var(--line,#dfe4ed); }
+.fishing-phase-steps li { display: flex; align-items: center; gap: 7px; font-size: 12px; line-height: 1.4; color: var(--muted,#59677a); }
+.fishing-phase-steps li > span { display: grid; place-items: center; border-radius: 50%; width: 23px; height: 23px; flex-shrink: 0; font-size: 11px; background: var(--surface,#fff); }
+.fishing-phase-steps li[aria-current=step] { color: var(--accent,#2254ff); font-weight: 700; }
+.fishing-phase-steps li[aria-current=step] > span { color: #fff; background: #2254ff; }
+.fishing-tension-track { height: 20px; position: relative; border-radius: 6px; background: linear-gradient(90deg,#dce4ef 0% 28%,#a6d1ba 28% 78%,#f2c4c4 78%); }
+.fishing-tension-track::after { content: ''; position: absolute; left: clamp(0%,var(--tension),100%); top: -4px; bottom: -4px; width: 4px; border-radius: 2px; transform: translateX(-2px); background: var(--ink,#182133); box-shadow: 0 0 0 2px var(--surface,#fff); }
+.fishing-tension-axis { display: flex; justify-content: space-between; gap: 10px; font-size: 11px; color: var(--muted,#59677a); margin-top: 9px; }
+.fishing-live-controls .fishing-tension-command { color: var(--ink,#182133); font-weight: 650; font-size: 14px; margin-top: 12px; }
+.sports-aim-feedback { display: flex; flex-wrap: wrap; gap: 8px 20px; align-items: center; padding: 14px 24px; background: var(--surface,#fff); color: var(--ink,#182133); border-bottom: 1px solid var(--line,#dfe4ed); font-size: 13px; line-height: 1.55; }
+.sports-aim-feedback > span { color: var(--muted,#59677a); font-size: 12px; }
+.sports-controls label > small { flex-basis: 100%; min-height: 32px; font-size: 11px; color: var(--muted,#59677a); line-height: 1.45; }
+[data-theme=dark] .destination-landscape { background: #24453e; color: #c1e6db; }
+[data-theme=dark] .destination-river .destination-landscape { background: #213f50; color: #bfdeef; }
+[data-theme=dark] .destination-mountain .destination-landscape { background: #2b3654; color: #d0daf4; }
+[data-theme=dark] .destination-golden .destination-landscape { background: #514124; color: #f3ddae; }
+[data-theme=dark] .fishing-tension-track { background: linear-gradient(90deg,#43516a 0% 28%,#4d7d63 28% 78%,#934e56 78%); }
+@media(max-width:680px) {
+  .game-guide { margin-bottom: 20px; padding-bottom: 16px; }
+  .game-guide-purpose > p { font-size: 15px; }
+  .game-next-action { font-size: 13px; }
+  .game-instructions > ol { grid-template-columns: 1fr; gap: 12px; }
+  .game-board-stage { padding: 20px 16px; min-height: 300px; border-radius: 14px; }
+  .games .game-board-stage .games-card { width: 70px; height: 102px; }
+  .fishing-expedition { padding: 20px 16px; }
+  .fishing-trip-heading { gap: 10px; }
+  .fishing-trip-heading h3 { font-size: 21px; }
+  .fishing-trip-heading > span { font-size: 11px; }
+  .fishing-destinations { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; }
+  .destination-landscape { height: 56px; }
+  .fishing-skins legend > span { display: block; margin: 6px 0 0; }
+  .fishing-skins label > span { padding: 10px; gap: 8px; }
+  .fishing-skins label > span > svg:first-child { width: 19px; }
+  .fishing-skins strong { font-size: 13px; }
+  .fishing-pool { grid-template-columns: 1fr; }
+  .fishing-phase-steps { padding: 14px 16px; gap: 6px; }
+  .fishing-phase-steps li { flex-direction: column; align-items: center; text-align: center; font-size: 10px; }
+  .sports-aim-feedback { padding: 14px 16px; }
+}
+@media(prefers-reduced-motion:reduce) { .game-guide *, .fishing-expedition * { transition: none !important; } }

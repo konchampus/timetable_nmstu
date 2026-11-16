@@ -1,0 +1,13 @@
+.arcade-mobile-frame { display: flex; justify-content: center; padding: 20px; background: #e5e9f0; min-height: 100dvh; }
+.arcade-mobile-frame iframe { width: 390px; height: 844px; border: 1px solid #bac4d5; border-radius: 16px; background: #f5f6f8; }
+.arcade-lab { max-width: 1120px; padding: 24px; margin: auto; }
+.arcade-lab-heading h1 { font-size: 28px; letter-spacing: -.025em; }
+.arcade-lab-heading p { max-width: 80ch; margin-top: 10px; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.arcade-lab-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 28px; }
+.arcade-lab-nav button { min-height: 44px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--ink); background: var(--surface); font-size: 12px; cursor: pointer; }
+.arcade-lab-nav button[aria-pressed=true] { background: #2254ff; border-color: #2254ff; color: #fff; }
+.arcade-lab-title { margin-bottom: 18px !important; }
+.arcade-lab-level { max-width: 240px; margin-bottom: 16px; }
+.arcade-lab-start { width: 100%; margin: 16px 0; }
+.arcade-lab-output { display: block; max-width: 100%; overflow-wrap: anywhere; font-size: 11px; color: var(--muted); margin-top: 20px; }
+@media(max-width:680px) { .arcade-lab { padding: 16px; } }

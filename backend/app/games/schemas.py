@@ -16,9 +16,14 @@ class StartRound(Mutation):
     bet: int = Field(strict=True, ge=0, le=500)
     choice: str | None = Field(default=None, max_length=30)
     mines: int | None = Field(default=None, strict=True, ge=1, le=10)
+    gameplay_version: Literal[1] | None = None
+    location: Literal["shore", "river", "mountain", "golden"] | None = None
+    skin: Literal["angler", "bear"] | None = None
 
     @model_validator(mode="after")
     def game_parameters(self) -> "StartRound":
+        if self.gameplay_version is not None and self.game not in {"darts", "bowling", "basketball", "football", "fishing"}:
+            raise ValueError("Локальная механика недоступна для этой игры")
         if self.game == "fishing":
             if self.bet != 0:
                 raise ValueError("Рыбалка бесплатная: bet=0")
@@ -33,16 +38,61 @@ class StartRound(Mutation):
             raise ValueError("В этой игре choice не используется")
         if self.game != "mines" and self.mines is not None:
             raise ValueError("mines используется только в сапёре")
+        if (self.location is not None or self.skin is not None) and (self.game != "fishing" or self.gameplay_version != 1):
+            raise ValueError("Локация и скин доступны только в рыбалке с локальной механикой")
+        return self
+
+
+class ShotInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    aim_x: int = Field(strict=True, ge=-1000, le=1000)
+    aim_y: int = Field(strict=True, ge=-1000, le=1000)
+    power: int = Field(strict=True, ge=100, le=1000)
+    ticks: int = Field(strict=True, ge=120, le=18000)
+
+
+class FishingEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    tick: int = Field(strict=True, ge=1, le=600)
+    held: bool = Field(strict=True)
+
+
+class FishingInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    cast_x: int = Field(strict=True, ge=-1000, le=1000)
+    cast_tick: int = Field(strict=True, ge=0, le=5400)
+    hook_tick: int | None = Field(default=None, strict=True, ge=0, le=600)
+    end_tick: int = Field(strict=True, ge=1, le=600)
+    events: list[FishingEvent] = Field(max_length=128)
+
+    @model_validator(mode="after")
+    def ordered_events(self) -> "FishingInput":
+        if self.hook_tick is None:
+            if self.events:
+                raise ValueError("Вываживание невозможно без подсечки")
+        elif self.hook_tick > self.end_tick:
+            raise ValueError("Подсечка позже конца раунда")
+        previous = self.hook_tick or 0
+        for event in self.events:
+            if event.tick <= previous or event.tick > self.end_tick:
+                raise ValueError("События должны строго возрастать между подсечкой и концом")
+            previous = event.tick
         return self
 
 
 class RoundAction(Mutation):
-    action: Literal["hit", "stand", "reveal", "cashout", "collect"]
+    action: Literal["hit", "stand", "reveal", "cashout", "collect", "finish", "finish_fishing"]
+    fishing: FishingInput | None = None
+    shot: ShotInput | None = None
     cell: int | None = Field(default=None, strict=True, ge=0, le=24)
     version: int = Field(strict=True, ge=1, le=2147483647)
 
     @model_validator(mode="after")
     def cell_parameter(self) -> "RoundAction":
+        if (self.action == "finish_fishing") != (self.fishing is not None):
+            raise ValueError("Журнал рыбалки обязателен только для finish_fishing")
+        if (self.action == "finish") != (self.shot is not None):
+            raise ValueError("Параметры броска обязательны только для finish")
         if (self.action == "reveal") != (self.cell is not None):
             raise ValueError("cell обязателен только для reveal")
         return self
@@ -69,6 +119,8 @@ class RoundsResponse(BaseModel):
 
 class GameInfo(BaseModel):
     id: GameId
+    fishing_world_version: Literal[1] | None = None
+    gameplay_version: Literal[1] | None = None
     rules_version: int = 1
     title: str
     description: str
@@ -126,6 +178,45 @@ class InventoryItem(BaseModel):
     weight: float
 
 
+class FishingSpecies(BaseModel):
+    name: str
+    rarity: str
+
+
+class LocationFish(BaseModel):
+    species: str
+    rarity: str
+    value: int
+    min_weight: float
+    max_weight: float
+    probability: float
+
+
+class FishingLocation(BaseModel):
+    id: str
+    title: str
+    description: str
+    tagline: str = ""
+    story_title: str = ""
+    story: str = ""
+    landmark: str = ""
+    featured_species: list[str] = Field(default_factory=list)
+    min_rod_level: int
+    unlocked: bool
+    value_multiplier: float
+    theme: str
+    preview_rod_level: int
+    fish: list[LocationFish]
+
+
+class FishingSkin(BaseModel):
+    id: str
+    title: str
+    description: str
+    min_rod_level: int
+    unlocked: bool
+
+
 class InventoryResponse(BaseModel):
     items: list[InventoryItem]
     rod_level: int
@@ -133,6 +224,12 @@ class InventoryResponse(BaseModel):
     max_rod_level: int = 5
     collection: list[str]
     record_weight: float
+    world_version: Literal[1] = 1
+    selected_location: str = "shore"
+    selected_skin: str = "angler"
+    locations: list[FishingLocation]
+    skins: list[FishingSkin]
+    species: list[FishingSpecies]
 
 
 class LeaderboardItem(BaseModel):

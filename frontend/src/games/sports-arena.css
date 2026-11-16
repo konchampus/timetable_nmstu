@@ -1,0 +1,46 @@
+/* Arena chrome is legible over every court; controls use the app's blue action. */
+.sports-arena {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 18px;
+  margin: 0;
+  background: var(--surface, #fff);
+  color: var(--ink, #182133);
+  border: 1px solid var(--line, #dfe4ed);
+}
+.sports-viewport { height: clamp(380px, 52dvh, 580px); touch-action: none; cursor: crosshair; background: #182b3e; }
+.sports-viewport canvas { display: block; width: 100%; height: 100%; }
+.sports-hud { position: absolute; top: 24px; left: 24px; right: 24px; display: flex; justify-content: space-between; align-items: start; gap: 20px; pointer-events: none; color: #f3f7fd; }
+.sports-hud h3 { font-size: clamp(20px, 2.8vw, 28px); font-weight: 750; letter-spacing: -.025em; max-width: 18ch; line-height: 1.15; padding: 13px 16px; border-radius: 12px; background: #14263bee; }
+.sports-hud > span { display: grid; grid-template-columns: auto auto; align-items: center; gap: 5px 8px; font-size: 17px; padding: 12px 14px; border-radius: 12px; background: #14263bee; font-variant-numeric: tabular-nums; }
+.sports-hud small { grid-column: 1/-1; font-size: 11px; color: #cbd9eb; }
+.sports-instruction { padding: 15px 24px; color: var(--ink, #26364a); font-size: 13px; line-height: 1.6; background: var(--soft, #f2f5fa); border-bottom: 1px solid var(--line, #dfe4ed); }
+.sports-local-result { padding: 16px 24px 0; color: var(--ink, #26364a); font-size: 14px; line-height: 1.6; font-weight: 600; }
+.sports-controls { padding: 22px 24px 18px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 16px 26px; align-items: center; }
+.sports-controls fieldset { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; min-width: 0; padding: 0; margin: 0; border: 0; }
+.sports-controls label { font-size: 12px; color: var(--muted, #59677a); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; min-width: 0; }
+.sports-controls label b { margin-left: auto; color: var(--ink, #26364a); font-size: 13px; }
+.sports-controls input { width: 100%; accent-color: #2254ff; min-height: 36px; margin: 0; cursor: ew-resize; }
+.sports-shoot { display: flex; align-items: center; justify-content: center; gap: 9px; min-height: 54px; min-width: 155px; padding: 15px 24px; border: 0; border-radius: 10px; background: #2254ff; color: #fff; font-size: 15px; font-weight: 700; white-space: nowrap; transition: background .18s, transform .18s; }
+.sports-shoot:not(:disabled):hover { background: #1944d8; }
+.sports-shoot:not(:disabled):active { transform: translateY(1px); }
+.sports-reset { grid-column: 1/-1; display: flex; align-items: center; justify-content: center; gap: 8px; color: var(--muted, #59677a); background: none; min-height: 44px; font-size: 12px; border: 0; }
+.sports-fallback { height: 100%; display: grid; align-content: center; justify-items: center; gap: 16px; padding: 100px 30px 30px; text-align: center; color: #e3ecf8; }
+.sports-fallback p { max-width: 42ch; font-size: 14px; line-height: 1.65; }
+.sports-arena button:focus-visible, .sports-arena input:focus-visible { outline: 3px solid var(--accent, #2254ff); outline-offset: 4px; }
+.sports-arena button:disabled { opacity: .55; cursor: not-allowed; }
+@media (max-width: 600px) {
+  .sports-arena { border-radius: 14px; }
+  .sports-hud { left: 14px; right: 14px; top: 14px; gap: 12px; }
+  .sports-hud h3 { font-size: 19px; padding: 11px 12px; max-width: 15ch; }
+  .sports-hud > span { font-size: 14px; padding: 10px; }
+  .sports-hud small { font-size: 10px; }
+  .sports-controls { grid-template-columns: 1fr; padding: 20px 16px 12px; gap: 14px; }
+  .sports-controls fieldset { gap: 12px; }
+  .sports-controls label { font-size: 11px; }
+  .sports-shoot { width: 100%; }
+  .sports-viewport { height: 420px; max-height: 58dvh; min-height: 300px; }
+  .sports-instruction, .sports-local-result { padding: 14px 16px; font-size: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .sports-arena * { transition: none !important; } }

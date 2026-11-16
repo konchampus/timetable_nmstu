@@ -7,6 +7,15 @@
 - Новый сервис изолирован: отдельная PostgreSQL 16, роли runtime/migrator, Docker network и volume. БД не публикуется наружу, web слушает только 127.0.0.1:18080 за отдельным HTTPS-vhost.
 - Рабочие контейнеры — non-root, read-only rootfs, no-new-privileges. Старые конфигурации сайта не редактировались; Nginx применял graceful reload, master PID сохранился. Прежний домен при обследовании отвечал HTTP 403; его содержимое/политику не меняли.
 
+## Точечный выпуск оформления Telegram · 16.11.2026
+
+- bot/worker переведены на образ `telegram-68117b6`; точный commit: `68117b63551502b8ed9904293f1cf69a973eb341`, ветка `feat/telegram-rich-timetable`. Исходная рабочая копия на сервере пока остаётся на a83a115: образ собран из git archive отдельной ветки, поэтому один rev-parse HEAD не описывает текущие bot/worker.
+- Сборка и import app.bot/app.worker прошли. bot/worker running, restarts=0, в просмотренных последних 80 строках нет ERROR/Traceback. API, web и PostgreSQL не пересоздавались; Mini App не менялся.
+- Добавлены нативные rich-таблицы, раскрываемые дни, список-fallback, inline-дни/недели/формат и copy-text аудиторий. Новые уведомления используют тот же формат, старый outbox сохранён.
+- Метод sendRichMessage распознан live API запросом без получателя (400 chat_id is empty). Успешной отправки/визуальной приёмки в Telegram пока нет: произвольным пользователям демонстрации не отправлялись; в runtime-report rich_accepted=0/rich_rejected=0.
+- Предыдущий backend-образ сохранён как `magtu-companion-backend:pre-telegram-68117b6`. Текущая local-tag указывает на новый backend, но уже запущенный api использует прежний image ID. При следующем общем restart api тоже получит новый образ; HTTP-код в нём не менялся.
+- Полное описание формата и ограничений: [TELEGRAM_MESSAGES.md](TELEGRAM_MESSAGES.md).
+
 ## Где конфигурация и как заменить токен
 
 На сервере, не в локальном проекте и не в Git:

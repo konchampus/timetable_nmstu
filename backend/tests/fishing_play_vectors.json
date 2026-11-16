@@ -1,0 +1,884 @@
+[
+  {
+    "name": "balanced_1",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 7,
+      "rod_level": 1
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 289,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        },
+        {
+          "tick": 98,
+          "held": false
+        },
+        {
+          "tick": 103,
+          "held": true
+        },
+        {
+          "tick": 108,
+          "held": false
+        },
+        {
+          "tick": 113,
+          "held": true
+        },
+        {
+          "tick": 119,
+          "held": false
+        },
+        {
+          "tick": 124,
+          "held": true
+        },
+        {
+          "tick": 134,
+          "held": false
+        },
+        {
+          "tick": 140,
+          "held": true
+        },
+        {
+          "tick": 147,
+          "held": false
+        },
+        {
+          "tick": 153,
+          "held": true
+        },
+        {
+          "tick": 162,
+          "held": false
+        },
+        {
+          "tick": 168,
+          "held": true
+        },
+        {
+          "tick": 174,
+          "held": false
+        },
+        {
+          "tick": 180,
+          "held": true
+        },
+        {
+          "tick": 191,
+          "held": false
+        },
+        {
+          "tick": 197,
+          "held": true
+        },
+        {
+          "tick": 204,
+          "held": false
+        },
+        {
+          "tick": 209,
+          "held": true
+        },
+        {
+          "tick": 216,
+          "held": false
+        },
+        {
+          "tick": 222,
+          "held": true
+        },
+        {
+          "tick": 230,
+          "held": false
+        },
+        {
+          "tick": 235,
+          "held": true
+        },
+        {
+          "tick": 240,
+          "held": false
+        },
+        {
+          "tick": 245,
+          "held": true
+        },
+        {
+          "tick": 255,
+          "held": false
+        },
+        {
+          "tick": 260,
+          "held": true
+        },
+        {
+          "tick": 267,
+          "held": false
+        },
+        {
+          "tick": 273,
+          "held": true
+        },
+        {
+          "tick": 281,
+          "held": false
+        },
+        {
+          "tick": 287,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 44,
+      "progress": 1000,
+      "slack": 0,
+      "status": "caught",
+      "reason": "landed"
+    }
+  },
+  {
+    "name": "always_hold_1",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 7,
+      "rod_level": 1
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 104,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 100,
+      "progress": 76,
+      "slack": 0,
+      "status": "lost",
+      "reason": "line_broke"
+    }
+  },
+  {
+    "name": "never_hold_1",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 7,
+      "rod_level": 1
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 118,
+      "events": []
+    },
+    "result": {
+      "tension": 0,
+      "progress": 0,
+      "slack": 20,
+      "status": "lost",
+      "reason": "slack_line"
+    }
+  },
+  {
+    "name": "balanced_2",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 14,
+      "rod_level": 2
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 268,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        },
+        {
+          "tick": 97,
+          "held": false
+        },
+        {
+          "tick": 103,
+          "held": true
+        },
+        {
+          "tick": 109,
+          "held": false
+        },
+        {
+          "tick": 115,
+          "held": true
+        },
+        {
+          "tick": 127,
+          "held": false
+        },
+        {
+          "tick": 133,
+          "held": true
+        },
+        {
+          "tick": 140,
+          "held": false
+        },
+        {
+          "tick": 146,
+          "held": true
+        },
+        {
+          "tick": 155,
+          "held": false
+        },
+        {
+          "tick": 161,
+          "held": true
+        },
+        {
+          "tick": 167,
+          "held": false
+        },
+        {
+          "tick": 173,
+          "held": true
+        },
+        {
+          "tick": 183,
+          "held": false
+        },
+        {
+          "tick": 188,
+          "held": true
+        },
+        {
+          "tick": 195,
+          "held": false
+        },
+        {
+          "tick": 201,
+          "held": true
+        },
+        {
+          "tick": 209,
+          "held": false
+        },
+        {
+          "tick": 215,
+          "held": true
+        },
+        {
+          "tick": 223,
+          "held": false
+        },
+        {
+          "tick": 228,
+          "held": true
+        },
+        {
+          "tick": 233,
+          "held": false
+        },
+        {
+          "tick": 238,
+          "held": true
+        },
+        {
+          "tick": 248,
+          "held": false
+        },
+        {
+          "tick": 253,
+          "held": true
+        },
+        {
+          "tick": 260,
+          "held": false
+        },
+        {
+          "tick": 266,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 47,
+      "progress": 1000,
+      "slack": 0,
+      "status": "caught",
+      "reason": "landed"
+    }
+  },
+  {
+    "name": "always_hold_2",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 14,
+      "rod_level": 2
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 102,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 100,
+      "progress": 45,
+      "slack": 0,
+      "status": "lost",
+      "reason": "line_broke"
+    }
+  },
+  {
+    "name": "never_hold_2",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 14,
+      "rod_level": 2
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 118,
+      "events": []
+    },
+    "result": {
+      "tension": 0,
+      "progress": 0,
+      "slack": 20,
+      "status": "lost",
+      "reason": "slack_line"
+    }
+  },
+  {
+    "name": "balanced_3",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 21,
+      "rod_level": 3
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 248,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        },
+        {
+          "tick": 97,
+          "held": false
+        },
+        {
+          "tick": 103,
+          "held": true
+        },
+        {
+          "tick": 114,
+          "held": false
+        },
+        {
+          "tick": 120,
+          "held": true
+        },
+        {
+          "tick": 127,
+          "held": false
+        },
+        {
+          "tick": 132,
+          "held": true
+        },
+        {
+          "tick": 139,
+          "held": false
+        },
+        {
+          "tick": 145,
+          "held": true
+        },
+        {
+          "tick": 153,
+          "held": false
+        },
+        {
+          "tick": 159,
+          "held": true
+        },
+        {
+          "tick": 165,
+          "held": false
+        },
+        {
+          "tick": 171,
+          "held": true
+        },
+        {
+          "tick": 183,
+          "held": false
+        },
+        {
+          "tick": 189,
+          "held": true
+        },
+        {
+          "tick": 196,
+          "held": false
+        },
+        {
+          "tick": 201,
+          "held": true
+        },
+        {
+          "tick": 209,
+          "held": false
+        },
+        {
+          "tick": 215,
+          "held": true
+        },
+        {
+          "tick": 221,
+          "held": false
+        },
+        {
+          "tick": 227,
+          "held": true
+        },
+        {
+          "tick": 235,
+          "held": false
+        },
+        {
+          "tick": 241,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 59,
+      "progress": 1000,
+      "slack": 0,
+      "status": "caught",
+      "reason": "landed"
+    }
+  },
+  {
+    "name": "always_hold_3",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 21,
+      "rod_level": 3
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 102,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 100,
+      "progress": 50,
+      "slack": 0,
+      "status": "lost",
+      "reason": "line_broke"
+    }
+  },
+  {
+    "name": "never_hold_3",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 21,
+      "rod_level": 3
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 118,
+      "events": []
+    },
+    "result": {
+      "tension": 0,
+      "progress": 0,
+      "slack": 20,
+      "status": "lost",
+      "reason": "slack_line"
+    }
+  },
+  {
+    "name": "balanced_4",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 28,
+      "rod_level": 4
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 232,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        },
+        {
+          "tick": 97,
+          "held": false
+        },
+        {
+          "tick": 103,
+          "held": true
+        },
+        {
+          "tick": 114,
+          "held": false
+        },
+        {
+          "tick": 120,
+          "held": true
+        },
+        {
+          "tick": 127,
+          "held": false
+        },
+        {
+          "tick": 133,
+          "held": true
+        },
+        {
+          "tick": 142,
+          "held": false
+        },
+        {
+          "tick": 148,
+          "held": true
+        },
+        {
+          "tick": 154,
+          "held": false
+        },
+        {
+          "tick": 160,
+          "held": true
+        },
+        {
+          "tick": 172,
+          "held": false
+        },
+        {
+          "tick": 178,
+          "held": true
+        },
+        {
+          "tick": 185,
+          "held": false
+        },
+        {
+          "tick": 190,
+          "held": true
+        },
+        {
+          "tick": 197,
+          "held": false
+        },
+        {
+          "tick": 202,
+          "held": true
+        },
+        {
+          "tick": 209,
+          "held": false
+        },
+        {
+          "tick": 214,
+          "held": true
+        },
+        {
+          "tick": 219,
+          "held": false
+        },
+        {
+          "tick": 224,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 62,
+      "progress": 1000,
+      "slack": 0,
+      "status": "caught",
+      "reason": "landed"
+    }
+  },
+  {
+    "name": "always_hold_4",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 28,
+      "rod_level": 4
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 108,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 100,
+      "progress": 88,
+      "slack": 0,
+      "status": "lost",
+      "reason": "line_broke"
+    }
+  },
+  {
+    "name": "never_hold_4",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 28,
+      "rod_level": 4
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 118,
+      "events": []
+    },
+    "result": {
+      "tension": 0,
+      "progress": 0,
+      "slack": 20,
+      "status": "lost",
+      "reason": "slack_line"
+    }
+  },
+  {
+    "name": "balanced_5",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 35,
+      "rod_level": 5
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 229,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        },
+        {
+          "tick": 100,
+          "held": false
+        },
+        {
+          "tick": 106,
+          "held": true
+        },
+        {
+          "tick": 113,
+          "held": false
+        },
+        {
+          "tick": 118,
+          "held": true
+        },
+        {
+          "tick": 125,
+          "held": false
+        },
+        {
+          "tick": 131,
+          "held": true
+        },
+        {
+          "tick": 139,
+          "held": false
+        },
+        {
+          "tick": 145,
+          "held": true
+        },
+        {
+          "tick": 151,
+          "held": false
+        },
+        {
+          "tick": 157,
+          "held": true
+        },
+        {
+          "tick": 169,
+          "held": false
+        },
+        {
+          "tick": 175,
+          "held": true
+        },
+        {
+          "tick": 182,
+          "held": false
+        },
+        {
+          "tick": 187,
+          "held": true
+        },
+        {
+          "tick": 195,
+          "held": false
+        },
+        {
+          "tick": 201,
+          "held": true
+        },
+        {
+          "tick": 207,
+          "held": false
+        },
+        {
+          "tick": 213,
+          "held": true
+        },
+        {
+          "tick": 221,
+          "held": false
+        },
+        {
+          "tick": 227,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 40,
+      "progress": 1000,
+      "slack": 0,
+      "status": "caught",
+      "reason": "landed"
+    }
+  },
+  {
+    "name": "always_hold_5",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 35,
+      "rod_level": 5
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 108,
+      "events": [
+        {
+          "tick": 93,
+          "held": true
+        }
+      ]
+    },
+    "result": {
+      "tension": 100,
+      "progress": 150,
+      "slack": 0,
+      "status": "lost",
+      "reason": "line_broke"
+    }
+  },
+  {
+    "name": "never_hold_5",
+    "challenge": {
+      "gameplay_version": 1,
+      "bite_tick": 90,
+      "shoal_x": -250,
+      "surge": 35,
+      "rod_level": 5
+    },
+    "proof": {
+      "cast_x": 0,
+      "cast_tick": 15,
+      "hook_tick": 92,
+      "end_tick": 118,
+      "events": []
+    },
+    "result": {
+      "tension": 0,
+      "progress": 0,
+      "slack": 20,
+      "status": "lost",
+      "reason": "slack_line"
+    }
+  }
+]

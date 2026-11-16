@@ -20,7 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Settings, User
 from app.security import lock_authenticated_user
-from . import engine
+from . import arcade, engine, fishing_play, fishing_world
 from .models import DailyClaim, FishingCatch, GameAction, GameRound, Wallet, WalletLedger
 from .schemas import RoundAction, StartRound
 
@@ -91,7 +91,8 @@ class GamesService:
         self.session.add(WalletLedger(user_id=self.user_id, round_id=round_id, event=event, amount=amount, balance_after=wallet.balance, created_at=now))
 
     async def _mutate(self, operation: str, body: dict, work: Callable[[Context], Awaitable[dict]]) -> dict:
-        parameters = {k: v for k, v in body.items() if k != "key"}
+        # New opt-in fields must not change fingerprints of legacy retries.
+        parameters = {k: v for k, v in body.items() if k != "key" and not (k in {"gameplay_version", "shot", "fishing", "location", "skin"} and v is None)}
         fingerprint = sha256(json.dumps({"operation": operation, "parameters": parameters}, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
 
         async def execute(context: Context) -> dict:
@@ -150,6 +151,8 @@ class GamesService:
                 self._stand(context, round_, expired=True)
             elif round_.game == "mines":
                 self._cashout(context, round_, expired=True)
+            elif round_.public_state.get("gameplay_version") == 1 and round_.game in arcade.SPORTS | {"fishing"}:
+                self._settle(context, round_, 0, {"gameplay_version": 1}, expired=True)
             else:
                 raise RuntimeError("Unexpected expiring game")
             round_.version += 1
@@ -230,7 +233,8 @@ class GamesService:
             level = context.wallet.rod_level
             return {"items": [{"species": r["species"], "rarity": r["rarity"], "count": r["count"], "value": r["value"], "weight": r["grams"] / 1000} for r in rows],
                     "rod_level": level, "upgrade_cost": engine.ROD_COST[level - 1] if level < 5 else None,
-                    "max_rod_level": 5, "collection": list(context.wallet.collected_species), "record_weight": context.wallet.record_grams / 1000}
+                    "max_rod_level": 5, "collection": list(context.wallet.collected_species), "record_weight": context.wallet.record_grams / 1000,
+                    **fishing_world.public_world(level, engine.FISH, engine.FISH_WEIGHTS, context.wallet.fishing_location, context.wallet.fishing_skin)}
         return await self._transaction(read)
 
     async def start(self, body: StartRound) -> dict:
@@ -245,7 +249,33 @@ class GamesService:
             # Ensure the round exists before inserting its ledger foreign key.
             await self.session.flush()
             self._money(context.wallet, -body.bet, f"round:{round_.id}:bet", context.now, round_.id)
-            if body.game == "fishing":
+            if body.gameplay_version == 1 and body.game == "fishing":
+                level = context.wallet.rod_level
+                # Missing opt-in fields retain legacy shore behavior, including old clients.
+                location_id = body.location or "shore"
+                skin_id = body.skin or "angler"
+                location = fishing_world.LOCATIONS[location_id]
+                skin = fishing_world.SKINS[skin_id]
+                if level < location["min_rod_level"]:
+                    fail(409, "location_locked", f"Для локации «{location['title']}» нужна удочка уровня {location['min_rod_level']}")
+                if level < skin["min_rod_level"]:
+                    fail(409, "skin_locked", f"Скин «{skin['title']}» откроется на уровне {skin['min_rod_level']}")
+                if body.location is not None:
+                    context.wallet.fishing_location = location_id
+                if body.skin is not None:
+                    context.wallet.fishing_skin = skin_id
+                round_.public_state = {"gameplay_version": 1, "world_version": 1, "rod_level": level,
+                                       "location": location_id, "location_title": location["title"], "skin": skin_id,
+                                       "bite_tick": engine.RNG.randrange(70, 131),
+                                       "shoal_x": engine.RNG.randrange(-700, 701), "surge": engine.RNG.randrange(64)}
+                round_.secret_state = engine.fishing_result(level, location_id)
+                round_.expires_at = context.now + timedelta(minutes=5)
+            elif body.gameplay_version == 1:
+                round_.public_state = {"gameplay_version": 1, "wind": engine.RNG.randrange(-120, 121),
+                                       "target_x": engine.RNG.randrange(-300, 301), "target_y": engine.RNG.randrange(-180, 181)}
+                round_.available_at = context.now + timedelta(seconds=2)
+                round_.expires_at = context.now + timedelta(minutes=5)
+            elif body.game == "fishing":
                 level = context.wallet.rod_level
                 round_.public_state = {"rod_level": level}
                 round_.secret_state = engine.fishing_result(level)
@@ -285,9 +315,40 @@ class GamesService:
             if round_.status != "active":
                 fail(409, "round_closed", "Раунд уже завершён")
             allowed = {"blackjack": {"hit", "stand"}, "mines": {"reveal", "cashout"}, "fishing": {"collect"}}
+            if round_.public_state.get("gameplay_version") == 1 and round_.game in arcade.SPORTS:
+                allowed = {round_.game: {"finish"}}
+            if round_.game == "fishing" and round_.public_state.get("gameplay_version") == 1:
+                allowed = {"fishing": {"finish_fishing"}}
             if body.action not in allowed.get(round_.game, set()):
                 fail(422, "invalid_action", "Действие недоступно для этой игры")
-            if round_.game == "blackjack":
+            if body.action == "finish_fishing":
+                if body.fishing is None or round_.game != "fishing" or round_.public_state.get("gameplay_version") != 1:
+                    fail(422, "invalid_fishing", "Журнал не подходит раунду")
+                proof = body.fishing.model_dump()
+                elapsed = (context.now - round_.created_at).total_seconds()
+                if (proof["cast_tick"] + proof["end_tick"]) / fishing_play.TICK_RATE > elapsed + 1:
+                    fail(409, "fishing_too_early", "Ловля ещё не завершена")
+                try:
+                    outcome = fishing_play.replay(round_.public_state, proof)
+                except ValueError:
+                    fail(422, "incomplete_fishing", "Журнал не завершает вываживание")
+                round_.public_state = {**round_.public_state, "fishing": proof, "fight": outcome}
+                if outcome["status"] == "caught":
+                    self._collect(context, round_, gameplay_verified=True)
+                else:
+                    self._settle(context, round_, 0, {"gameplay_version": 1, "reason": outcome["reason"], "escaped": True})
+                    round_.status = "lost"
+            elif body.action == "finish":
+                if body.shot is None or round_.game not in arcade.SPORTS or round_.public_state.get("gameplay_version") != 1:
+                    fail(422, "invalid_shot", "Параметры броска не подходят раунду")
+                elapsed = (context.now - round_.created_at).total_seconds()
+                if elapsed < 2 or body.shot.ticks / 60 > elapsed + 1:
+                    fail(409, "shot_too_early", "Бросок ещё не завершён")
+                shot = body.shot.model_dump()
+                outcome = arcade.replay(round_.game, round_.public_state, shot)
+                round_.public_state = {**round_.public_state, "shot": shot}
+                self._settle(context, round_, engine.payout(round_.bet, outcome.multiplier), outcome.result)
+            elif round_.game == "blackjack":
                 if body.action == "hit":
                     secret = {k: list(v) for k, v in round_.secret_state.items()}
                     secret["player"].append(secret["deck"].pop())
@@ -325,8 +386,8 @@ class GamesService:
         if len(cells) == 25 - old["mines_count"]:
             self._cashout(context, round_)
 
-    def _collect(self, context: Context, round_: GameRound) -> None:
-        if round_.available_at is None or context.now < round_.available_at:
+    def _collect(self, context: Context, round_: GameRound, *, gameplay_verified: bool = False) -> None:
+        if not gameplay_verified and (round_.available_at is None or context.now < round_.available_at):
             fail(409, "fishing_not_ready", "Улов ещё не готов")
         fish = round_.secret_state
         self.session.add(FishingCatch(user_id=self.user_id, round_id=round_.id, species=fish["species"], rarity=fish["rarity"], value=fish["value"], weight_grams=fish["weight_grams"], caught_at=context.now))

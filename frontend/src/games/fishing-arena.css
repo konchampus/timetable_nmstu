@@ -1,0 +1,45 @@
+/* The lake owns the scene; a light, app-native console owns the controls. */
+.fishing-arena { background: var(--surface, #fff); color: var(--ink, #182133); overflow: hidden; }
+.fishing-live-stage { position: relative; height: clamp(420px, 58dvh, 620px); min-height: 380px; }
+.fishing-live-stage .games-scene { height: 100% !important; min-height: 0 !important; border-radius: 0 !important; background: #75b0b5 !important; }
+.fishing-live-stage .games-scene-caption { display: none; }
+.fishing-live-hud { position: absolute; inset: 22px 24px auto; display: flex; align-items: center; gap: 14px; color: #f3f8f5; }
+.fishing-live-hud > span { display: flex; align-items: center; gap: 8px; margin-right: auto; font-size: 13px; font-weight: 650; padding: 11px 14px; border-radius: 10px; background: #183d3cef; }
+.fishing-live-hud strong { font-size: 12px; background: #183d3cef; padding: 12px; border-radius: 10px; }
+.fishing-live-hud button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 10px; color: #f4f6e9; background: #183d3c; border: 1px solid #ffffff35; }
+.fishing-live-title { position: absolute; bottom: 0; left: 0; right: 0; padding: 50px 26px 24px; background: linear-gradient(transparent, #133a39ed 45%); color: #fff; pointer-events: none; }
+.fishing-live-title h3 { font-size: clamp(24px, 3vw, 32px); font-weight: 750; letter-spacing: -.03em; line-height: 1.15; max-width: 28ch; }
+.fishing-live-title p { font-size: 13px; line-height: 1.65; margin-top: 9px; color: #e0eee8; max-width: 60ch; }
+.fishing-live-controls { display: grid; gap: 18px; padding: 24px 26px 28px; }
+.fishing-live-controls p { font-size: 13px; line-height: 1.6; color: var(--muted, #586b68); }
+.fishing-live-primary { display: flex; align-items: center; justify-content: center; gap: 10px; min-height: 56px; padding: 16px 22px; border: 0; border-radius: 10px; color: #fff; background: #2254ff; font-size: 15px; font-weight: 700; transition: background .18s, transform .18s; }
+.fishing-live-primary:not(:disabled):hover { background: #1944d8; }
+.fishing-live-primary:disabled { opacity: .5; cursor: not-allowed; }
+.fishing-arena button:focus-visible, .fishing-cast-control input:focus-visible { outline: 3px solid var(--accent, #2254ff); outline-offset: 4px; }
+.fishing-reel { touch-action: none; user-select: none; -webkit-user-select: none; }
+.fishing-reel.is-held { background: #1739ac; transform: translateY(2px); }
+.fishing-cast-control { display: grid; gap: 10px; font-size: 14px; font-weight: 600; }
+.fishing-cast-control input { width: 100%; min-height: 40px; accent-color: #2254ff; margin: 0; }
+.fishing-cast-control > span { color: var(--muted, #586b68); font-size: 12px; font-weight: 400; }
+.fishing-tension label, .fishing-landing label { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; font-weight: 600; margin-bottom: 10px; }
+.fishing-tension meter, .fishing-landing progress { display: block; width: 100%; height: 16px; accent-color: #2254ff; border-radius: 6px; overflow: hidden; }
+.fishing-tension p { margin-top: 9px; }
+.fishing-landed { display: flex; align-items: center; gap: 24px; padding: 4px 0; }
+.fishing-landed .fish-portrait { width: 140px; flex-shrink: 0; }
+.fishing-landed h3 { font-size: 26px; letter-spacing: -.025em; }
+.fishing-phase-bite .fishing-live-title { background: linear-gradient(transparent, #66451af2 45%); }
+.fishing-phase-bite .fishing-live-primary { background: #a55215; color: #fff; }
+@media (max-width: 600px) {
+  .fishing-live-stage { height: 440px; max-height: 62dvh; min-height: 350px; }
+  .fishing-live-hud { inset: 14px 14px auto; gap: 8px; flex-wrap: wrap; }
+  .fishing-live-hud > span { font-size: 12px; padding: 10px; }
+  .fishing-live-hud strong { font-size: 11px; padding: 10px; }
+  .fishing-live-title { padding: 44px 18px 20px; }
+  .fishing-live-title h3 { font-size: 24px; }
+  .fishing-live-title p { font-size: 12px; }
+  .fishing-live-controls { padding: 20px 18px 24px; gap: 16px; }
+  .fishing-live-primary { width: 100%; }
+  .fishing-landed { gap: 14px; }
+  .fishing-landed .fish-portrait { width: 100px; }
+}
+@media (prefers-reduced-motion: reduce) { .fishing-arena * { transition: none !important; } }

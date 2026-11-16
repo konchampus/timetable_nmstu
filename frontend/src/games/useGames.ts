@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api, ApiError, mutationKey } from '../lib/api';
-import type { GameId, GameInfo, Inventory, Leaderboard, Round, Wallet } from './types';
+import type { GameId, GameInfo, Inventory, Leaderboard, Round, Wallet, FishingLocationId, FishingSkinId } from './types';
 export interface PendingMutation { path: string; body: Record<string, unknown>; title: string; roundId?: string; }
 interface Data { catalog: GameInfo[]; wallet: Wallet | null; inventory: Inventory | null; rounds: Round[]; history: Round[]; }
 const mergeRounds = (previous: Round[], incoming: Round[]) => {
@@ -106,7 +106,7 @@ export function useGames(onBalanceChange?: (balance: number) => void) {
     catch(cause){if(alive.current)setError(errorMessage(cause)+' Не удалось открыть раунд. Попробуйте ещё раз.');return null;}
   },[refresh]);
   const action=useCallback((round:Round,action:string,cell?:number)=>mutate('/games/rounds/'+encodeURIComponent(round.id)+'/actions',{action,version:round.version,...(cell!==undefined?{cell}:{})},'Действие: '+action,round.id),[mutate]);
-  const start=useCallback((game:GameId,bet:number,choice?:string,mines?:number)=>mutate('/games/rounds',{game,bet,...(choice?{choice}:{}),...(mines!==undefined?{mines}:{})},'Новый раунд'),[mutate]);
+  const start=useCallback((game:GameId,bet:number,choice?:string,mines?:number,gameplayVersion?:1,fishing?:{location:FishingLocationId;skin:FishingSkinId})=>mutate('/games/rounds',{game,bet,...(game==='fishing'&&fishing?fishing:{}),...(choice?{choice}:{}),...(mines!==undefined?{mines}:{}),...(gameplayVersion?{gameplay_version:gameplayVersion}:{})},'Новый раунд'),[mutate]);
   return {...data,loading,busy,pending,error,notice,identityReady,persistentRecovery,walletFresh,historyLoading,hasMoreHistory,loadMoreHistory,refresh,mutate,retry,loadRound,action,start};
 }
 export function errorMessage(cause:unknown){if(cause instanceof ApiError&&cause.status===401)return 'Telegram-сессия истекла. Откройте приложение заново из бота.';if(cause instanceof Error&&cause.name==='AbortError')return 'Сервер не ответил вовремя.';return cause instanceof Error?cause.message:'Нет связи с сервером.';}

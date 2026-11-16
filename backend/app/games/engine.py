@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from fractions import Fraction
 from math import comb
 from secrets import SystemRandom
+from . import fishing_world
 
 RNG = SystemRandom()
 RULES_VERSION = 1
@@ -20,11 +21,13 @@ RED = frozenset((1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 
 FISH = (
     ("Плотва", "common", 10, 100, 500),
     ("Карась", "uncommon", 25, 300, 1200),
+    ("Карп", "rare", 60, 1000, 8000),
     ("Щука", "rare", 60, 1000, 4000),
     ("Сом", "epic", 150, 3000, 12000),
     ("Золотая рыба", "legendary", 400, 500, 2000),
+    ("Золотой карп", "legendary", 900, 2000, 10000),
 )
-FISH_WEIGHTS = ((65, 23, 9, 2, 1), (57, 26, 12, 4, 1), (49, 28, 15, 6, 2), (40, 30, 18, 9, 3), (30, 30, 22, 13, 5))
+FISH_WEIGHTS = ((65, 23, 3, 6, 2, 1, 0), (57, 26, 4, 8, 4, 1, 0), (49, 28, 5, 10, 6, 2, 0), (40, 30, 6, 12, 9, 3, 0), (30, 30, 8, 14, 13, 5, 0))
 ROD_WAIT = (15, 12, 10, 8, 6)
 ROD_COST = (250, 750, 1500, 3000)
 GAME_IDS = ("slots", "fishing", "dice", "darts", "bowling", "basketball", "football", "coin", "roulette", "blackjack", "mines", "wheel")
@@ -145,14 +148,16 @@ def adjacent_mines(cell: int, positions: list[int]) -> int:
     return sum(abs(divmod(mine, 5)[0] - row) <= 1 and abs(divmod(mine, 5)[1] - column) <= 1 for mine in positions)
 
 
-def fishing_result(level: int) -> dict:
-    draw = RNG.randrange(100)
+def fishing_result(level: int, location_id: str = "shore") -> dict:
+    weights = fishing_world.pool_weights(level, location_id, FISH_WEIGHTS)
+    draw = RNG.randrange(sum(weights))
     index = 0
-    for index, weight in enumerate(FISH_WEIGHTS[level - 1]):
+    for index, weight in enumerate(weights):
         if draw < weight:
             break
         draw -= weight
     species, rarity, value, low, high = FISH[index]
+    value = int(value * fishing_world.LOCATIONS[location_id]["value_multiplier"])
     return {"species": species, "rarity": rarity, "value": value, "weight_grams": RNG.randint(low, high)}
 
 
@@ -160,7 +165,19 @@ def catalog() -> list[dict]:
     common = ["Только игровые очки без денежной стоимости.", "Множитель — общая выплата со ставкой; прибыль = выплата минус ставка. Округление вниз до целого.", "Версия правил: 1. Ставка 10–500, кроме бесплатной рыбалки. Например, 10 × 1.9 = 19, прибыль 9."]
     definitions = {
         "slots": ("Слоты", "Три независимых барабана", ["Каждый из пяти символов равновероятен на каждом барабане.", "Тройка cherry/lemon/bell/diamond/seven: ×5/7/10/15/25. Ровно пара ×1, иначе 0. Максимальная выплата 12500."], {**{f"triple_{s}": float(v) for s, v in SLOT_TRIPLES.items()}, "pair": 1, "other": 0}, {**{f"triple_{s}": 1 / 125 for s in SYMBOLS}, "pair": 60 / 125, "other": 60 / 125}),
-        "fishing": ("Рыбалка", "Лови, собирай и улучшай удочку", ["Бесплатно: bet=0, один активный заброс. Улов скрыт до collect, не истекает.", "Удочки 1–5: ожидание 15/12/10/8/6 секунд; улучшения 250/750/1500/3000.", "common/uncommon/rare/epic/legendary: Плотва/Карась/Щука/Сом/Золотая рыба, стоимость 10/25/60/150/400.", "Вес равновероятен по целому грамму: 100–500/300–1200/1000–4000/3000–12000/500–2000. В ответах килограммы.", "Продажа всех рыб атомарна; коллекция и рекорд сохраняются. Максимальная стоимость одной рыбы 400."], {fish[1]: fish[2] for fish in FISH}, {f"rod_{level}_{fish[1]}": FISH_WEIGHTS[level-1][i] / 100 for level in range(1, 6) for i, fish in enumerate(FISH)}),
+        "fishing": ("Рыбалка", "Лови, открывай локации и собирай коллекцию", [
+            "Бесплатный заброс, только один активный раунд. Улов сначала попадает в садок; очки начисляются при продаже.",
+            "Удочки 1–5; улучшения стоят 250/750/1500/3000 очков. Доступные локации открываются на уровнях 1/3/4/5.",
+            "На берегу действует базовая стоимость, в реке ×1.5, в горном озере ×2, в золотой заводи ×3. Дробная стоимость округляется вниз.",
+            "Состав и вероятности улова выбранной локации указаны перед забросом. Они относятся к успешно вываженной рыбе, не гарантируют успешную ловлю.",
+            "Золотой карп — отдельный легендарный вид, встречается за пределами тихого берега. Базовая стоимость 900 очков, вес 2–10 кг.",
+            "Скин медведя открывается на уровне удочки 3 бесплатно и не меняет шансы, стоимость или управление.",
+            "Продажа всех рыб атомарна; коллекция и рекорд сохраняются. Старые забросы сохраняют уже определённый улов."
+        ], {fish[1]: fish[2] for fish in FISH[:6]},
+            {f"rod_{level}_{rarity}": sum(FISH_WEIGHTS[level-1][i] for i, fish in enumerate(FISH) if fish[1] == rarity) / 100
+             for level in range(1, 6) for rarity in dict.fromkeys(fish[1] for fish in FISH)} |
+            {f"rod_{level}_species_{fish[0]}": FISH_WEIGHTS[level-1][i] / 100
+             for level in range(1, 6) for i, fish in enumerate(FISH)}),
         "dice": ("Кости", "Угадай диапазон", ["low: 1–3, high: 4–6. Значения 1–6 равновероятны, угаданный диапазон ×1.9, иначе 0. Максимум 950."], {"win": 1.9, "lose": 0}, {"win": .5, "lose": .5}),
         "darts": ("Дартс", "Шесть зон мишени", ["Зоны 0/5/10/20/25/50 равновероятны. Выплаты 0/0/0/1/2/3. Максимум 1500."], {str(k): v for k, v in DART_PAYOUTS.items()}, {str(k): 1/6 for k in DART_ZONES}),
         "bowling": ("Боулинг", "Один бросок — до десяти кеглей", ["0–10 кеглей равновероятны: 0–6 ×0, 7–8 ×1, 9 ×2, 10 ×7. Максимум 3500."], {str(k): v for k, v in BOWLING_PAYOUTS.items()}, {str(k): 1/11 for k in range(11)}),
@@ -175,5 +192,21 @@ def catalog() -> list[dict]:
     result = []
     for game in GAME_IDS:
         title, description, rules, payouts, probabilities = definitions[game]
-        result.append({"id": game, "rules_version": RULES_VERSION, "title": title, "description": description, "rules": [*common, *rules], "min_bet": 0 if game == "fishing" else 10, "max_bet": 0 if game == "fishing" else 500, "payouts": payouts, "probabilities": probabilities})
+        if game == "fishing":
+            description = "Заброс, подсечка и вываживание с натяжением"
+            rules = ["Локальная механика v1: выберите место, подсеките в течение 1.2 секунды после поклёвки, затем управляйте натяжением.",
+                     "Удерживайте кнопку для подтягивания; отпускайте для ослабления. Натяжение 100% рвёт леску; слабина в течение секунды позволяет рыбе уйти.",
+                     "Подтягивание эффективно при натяжении 28–78%. Доведите прогресс до берега; максимум 30 игровых секунд на ловлю.",
+                     "Вид, вес и стоимость скрыты до успешного вываживания. Сервер воспроизводит журнал и только затем сохраняет улов.",
+                     "Локальный раунд истекает через 5 минут реального времени. Старые раунды без gameplay_version сохраняют прежний collect.", *rules]
+        sport = game in {"darts", "bowling", "basketball", "football"}
+        if sport:
+            description = {"darts": "Наведи прицел и выбери силу броска", "bowling": "Направь шар в карман между кеглями", "basketball": "Рассчитай дугу и попади в кольцо", "football": "Выбери направление и силу удара"}[game]
+            rules = ["Механика v1: прицел и сила управляются локально, сервер воспроизводит тот же бросок.",
+                     "Бросок зависит от направления, силы и показанного бокового сноса, а не от случайного ответа после броска.",
+                     "Один бросок на раунд; завершите его за 5 минут. Истёкший раунд закрывается без выплаты.",
+                     "Шансы не фиксированы: результат зависит от ввода. Баланс и выплату изменяет только сервер.",
+                     "Совместимость: старые клиенты без gameplay_version продолжают использовать прежние случайные правила."]
+            probabilities = {}
+        result.append({"id": game, "fishing_world_version": 1 if game == "fishing" else None, "gameplay_version": 1 if sport or game == "fishing" else None, "rules_version": RULES_VERSION, "title": title, "description": description, "rules": [*common[:2], *rules] if sport else [*common, *rules], "min_bet": 0 if game == "fishing" else 10, "max_bet": 0 if game == "fishing" else 500, "payouts": payouts, "probabilities": probabilities})
     return result

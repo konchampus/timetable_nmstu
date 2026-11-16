@@ -1,0 +1,186 @@
+/* Game surface refinement. Existing blue app identity; game materials stay inside scenes.
+   Operate mode: stage first, controls second. No changes to rules or wallet contracts. */
+.games {
+  --games-bg: var(--surface, #fff);
+  --games-panel: var(--soft, #f3f5f9);
+  --games-ink: var(--ink, #182133);
+  --games-muted: var(--muted, #5b6678);
+  --games-line: var(--line, #dfe4ed);
+  --games-accent: var(--accent, #2254ff);
+  --games-soft: var(--accent-soft, #edf2ff);
+  max-width: 1180px;
+  font-variant-numeric: tabular-nums;
+}
+.games .games-header { margin: 10px 0 24px; }
+.games .games-header h1 { font-size: clamp(30px, 4vw, 40px); letter-spacing: -.035em; }
+.games .games-header p { margin-top: 8px; font-size: 14px !important; }
+.games .games-wallet { padding: 20px 24px; border-radius: 16px; background: var(--games-bg); color: var(--games-ink); }
+.games .games-wallet-main strong { font-size: 28px; letter-spacing: -.03em; }
+.games .games-tabs { margin: 18px 0 24px !important; }
+.games .games-tabs button { min-height: 44px !important; font-size: 14px; }
+.games .games-fishing-feature { min-height: 240px; padding: 30px 36px; border-radius: 20px; }
+.games .games-fishing-feature h2 { font-size: clamp(26px, 3vw, 34px); line-height: 1.1; letter-spacing: -.035em; }
+.games .games-fishing-feature p { font-size: 14px; }
+.games .games-fishing-feature span { font-size: 14px; margin-top: 22px; }
+.games .game-search { min-height: 52px; border-radius: 12px; }
+.games .game-search input { font-size: 15px; }
+.games .game-categories { gap: 8px; }
+.games .game-categories button { min-height: 44px; font-size: 13px; padding: 9px 16px; border-radius: 10px; }
+.games .games-catalog-title { margin: 28px 0 16px; }
+.games .games-catalog-title h2 { font-size: 23px; }
+.games .games-catalog-title > span { font-size: 13px; }
+.games .games-catalog { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.games .games-tile { border-radius: 16px !important; }
+.games .games-tile-art { height: auto; aspect-ratio: 1.5; margin: 0; border-radius: 0; }
+.games .games-tile-open { top: auto; bottom: 12px; width: 36px; height: 36px; }
+.games .games-tile-copy { display: flex !important; flex-direction: column; width: 100%; margin: 0 !important; padding: 18px; min-height: 158px; gap: 7px; }
+.games .games-tile-copy > strong { font-size: 19px; letter-spacing: -.025em; }
+.games .games-tile-copy > .game-tile-kind { display: block; font-size: 11px !important; font-weight: 600; color: var(--games-muted) !important; }
+.games .games-tile-copy > span:not(.game-tile-kind) { font-size: 13px !important; line-height: 1.55 !important; -webkit-line-clamp: 2; color: var(--games-muted) !important; }
+.games .games-tile-copy > small { font-size: 12px !important; padding-top: 9px; color: var(--games-muted); }
+.games .games-button { background: #2254ff; min-height: 48px; border-radius: 10px !important; font-size: 14px; }
+.games .games-button-soft { background: var(--games-panel) !important; color: var(--games-ink) !important; }
+.games .games-button:not(:disabled):hover { filter: brightness(.94); }
+.games .games-button:disabled { filter: saturate(.3); }
+.games .games-empty { gap: 14px; border: 1px dashed var(--games-line); border-radius: 16px; margin: 18px 0; }
+.games.is-playing { position: relative; max-width: 1180px; }
+.games.is-playing > .games-header { justify-content: flex-end; margin: 0; min-height: 56px; }
+.games.is-playing > .games-header > div:first-child { display: none; }
+.games.is-playing > .games-wallet { position: absolute; top: 0; left: 0; min-height: 56px; padding: 0; border: 0 !important; background: none !important; box-shadow: none; }
+.games.is-playing .games-wallet-main { gap: 10px; }
+.games.is-playing .games-wallet-main > span { font-size: 11px; }
+.games.is-playing .games-wallet-main strong { font-size: 21px; }
+.games.is-playing > .games-wallet > .games-button,
+.games.is-playing > .games-tabs,
+.games.is-playing > .games-disclaimer,
+.games.is-playing > .games-footer { display: none; }
+.games.is-playing .games-game-heading { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 8px 22px; padding: 20px 0 24px; margin: 0 !important; }
+.games.is-playing .games-back { align-self: start; grid-row: 1 / 3; margin: 0; padding: 0 14px 0 0; min-height: 42px !important; border-right: 1px solid var(--games-line); border-radius: 0 !important; font-size: 13px; }
+.games.is-playing .games-game-heading h2 { margin: 0; font-size: clamp(26px, 3vw, 34px) !important; line-height: 1.1; letter-spacing: -.03em !important; }
+.games.is-playing .games-game-heading > p { max-width: 65ch; margin: 0; font-size: 13px; line-height: 1.5; color: var(--games-muted); }
+.game-session-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(300px, 350px); align-items: start; gap: 24px; }
+.game-stage { min-width: 0; position: sticky; top: 24px; }
+.games .game-stage > .games-scene { height: clamp(340px, 42vw, 500px) !important; min-height: 300px !important; margin: 0; border-radius: 18px !important; background: #e5eaf4 !important; }
+.games[data-game=blackjack] .game-stage > .games-scene { background: #d8e5e1 !important; }
+.games[data-game=coin] .game-stage > .games-scene,
+.games[data-game=wheel] .game-stage > .games-scene { background: #eee7dc !important; }
+.games[data-game=slots] .game-stage > .games-scene { background: #e2e8f5 !important; }
+.games[data-game=mines] .game-stage > .games-scene { background: #dce8ed !important; }
+.games .games-scene-caption { left: 18px; right: 18px; bottom: 16px; color: #4c5871; font-size: 11px; line-height: 1.5; }
+.game-stage-guide { display: grid; gap: 6px; padding: 18px 4px; font-size: 12px; color: var(--games-muted); line-height: 1.55; }
+.game-stage-guide > span:first-child { display: flex; align-items: center; gap: 8px; color: var(--games-ink); font-weight: 600; }
+.game-stage-guide > span:last-child { padding-left: 24px; }
+.games.is-playing .games-game-body { min-width: 0; width: 100%; max-width: none; margin: 0 !important; padding: 22px !important; background: var(--games-bg) !important; border: 1px solid var(--games-line); border-radius: 16px !important; }
+.game-control-heading { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; padding-bottom: 8px; }
+.game-control-heading h3 { font-size: 19px; }
+.game-control-heading > span { font-size: 11px; font-weight: 500; color: var(--games-muted); }
+.games.is-playing .games-bet-form { margin: 0; gap: 16px; background: none; }
+.games .games-field { gap: 9px; font-size: 13px; }
+.games .games-field input:not([type=range]), .games .games-field select { min-height: 52px; background: var(--games-bg) !important; font-size: 17px; }
+.games .games-bet-presets { gap: 6px; }
+.games .games-bet-presets button { min-width: 0; padding: 10px 6px; font-size: 12px; border-radius: 8px; }
+.games .games-bet-presets button[aria-pressed=true] { background: var(--games-soft); border-color: var(--games-accent); color: var(--games-accent); font-weight: 700; }
+.games .games-bet-form > .games-muted { font-size: 12px; line-height: 1.65; }
+.games .games-choices label > span { min-height: 48px; border-radius: 9px; }
+.games .games-start { min-height: 54px; margin: 2px 0 0; }
+.games.is-playing .games-rules { margin-top: 22px; }
+.games .games-rules summary { font-size: 12px; line-height: 1.45; min-height: 54px; gap: 7px; }
+.games .games-rule-tables { grid-template-columns: 1fr; gap: 20px; }
+.games.is-playing .games-round-meta { font-size: 10px; padding: 16px 0 0; border: 0; }
+.games.is-playing .games-outcome { margin: 0 0 20px; padding: 18px; background: var(--games-panel); }
+.games .games-outcome-win { background: #eaf5ee; border-color: #bfdac9; color: #16462d; }
+.games .games-outcome-win p, .games .games-outcome-win > span { color: #38614b; }
+.games .games-card-table { gap: 22px; padding: 5px 0 14px; }
+.games .games-cards { gap: 8px; padding: 5px 3px 14px; }
+.games .games-card { width: 67px; height: 98px; border-radius: 8px; background: #fcfcfd; color: #24324a; box-shadow: 0 5px 10px #182b3e14; }
+.games .games-card-red { color: #b7354e; }
+.games .games-card-hidden { color: #c7d6ff; background: repeating-linear-gradient(45deg, #244284, #244284 4px, #2c4b91 4px, #2c4b91 5px); border: 4px solid #edf1fa; }
+.games .games-minefield { gap: 7px; }
+.games .games-minefield button { border-radius: 8px; background: #dce5f3; color: #315494; box-shadow: inset 0 2px 0 #ffffff95, 0 3px 0 #bac9df; }
+.games .games-minefield button:not(:disabled):hover { background: #c4d5f0; transform: translateY(-2px); }
+.games .games-minefield .games-cell-open { box-shadow: none; background: #e5f3ec; color: #216244; border-color: #bcdac9; }
+.games .games-minefield .games-cell-mine { box-shadow: none; background: #f9e3e6; color: #a42e42; border-color: #e6b7c0; }
+.games .games-cashout { padding-top: 14px; border-top: 1px solid var(--games-line); }
+.games .games-cashout > .games-button { width: 100%; }
+.has-live-arena { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.has-live-arena .game-stage { position: static; }
+.has-live-arena .games-game-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(240px, 1fr); gap: 0 32px; }
+.has-live-arena .games-game-body > .games-rules { margin-top: 0; }
+.has-live-arena .games-round-meta { grid-column: 1 / -1; }
+.games .fishing-world { border-radius: 18px; }
+.games .fishing-stage { height: clamp(300px, 40vw, 440px); }
+.games .fishing-console { padding: 24px; }
+.games .fishing-status h3 { font-size: 24px; }
+.games .fishing-status p, .games .fishing-server-note { font-size: 13px; }
+.games .fishing-tabs button { min-height: 46px; font-size: 13px; }
+.games .fishing-tabs small { font-size: 11px; }
+.games .fishing-tab-content { padding: 22px 24px 26px; }
+.games .fishing-empty h3, .games .fishing-bag-heading h3, .games .fishing-gear-intro h3 { font-size: 17px; }
+.games .fishing-empty p, .games .fishing-gear-intro p { font-size: 13px; }
+.games .fishing-species { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.games .fishing-species h4 { font-size: 13px; }
+.games .fishing-species article > span { font-size: 11px; }
+.games .fishing-catches h4 { font-size: 14px; }
+.games .fishing-catches p, .games .fishing-catches h4 span { font-size: 12px; }
+.games .fishing-catches article > strong { font-size: 14px; }
+.games .fishing-catches article > strong small { font-size: 10px; }
+.games .fishing-record > span, .games .fishing-upgrade-price { font-size: 12px; }
+.games .fishing-record > span strong, .games .fishing-upgrade-price strong { font-size: 15px; }
+.games .games-history-content > span { font-size: 14px; }
+.games .games-history-content > small { font-size: 12px; }
+[data-theme=dark] .games .game-stage > .games-scene { background: #1e2b40 !important; }
+[data-theme=dark] .games[data-game=blackjack] .game-stage > .games-scene { background: #193a36 !important; }
+[data-theme=dark] .games .games-scene-caption { color: #c4d0e5; }
+[data-theme=dark] .games .games-outcome-win { background: #193a2d; color: #d7f4df; border-color: #345d47; }
+[data-theme=dark] .games .games-outcome-win p, [data-theme=dark] .games .games-outcome-win > span { color: #b4dac2; }
+[data-theme=dark] .games .games-minefield button { background: #2b3c56; color: #c5d6f8; box-shadow: inset 0 1px 0 #667a9460, 0 3px 0 #162437; border-color: #435777; }
+[data-theme=dark] .games .games-minefield .games-cell-open { background: #203f35; color: #b5e9cd; box-shadow: none; }
+[data-theme=dark] .games .games-minefield .games-cell-mine { background: #4d2936; color: #ffc3ce; box-shadow: none; }
+@media (max-width: 900px) {
+  .game-session-layout { grid-template-columns: minmax(0, 1fr) minmax(280px, 310px); gap: 16px; }
+  .games.is-playing .games-game-body { padding: 18px !important; }
+  .games .games-catalog { gap: 14px; }
+  .games .games-tile-copy { padding: 14px; }
+  .games .games-tile-copy > strong { font-size: 17px; }
+  .has-live-arena { grid-template-columns: 1fr; }
+}
+@media (max-width: 680px) {
+  .games .games-catalog { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .games .games-tile-art { aspect-ratio: 1.2; }
+  .games .games-tile-copy { min-height: 158px; padding: 13px; gap: 6px; }
+  .games .games-tile-copy > strong { font-size: 16px; }
+  .games .games-tile-copy > span:not(.game-tile-kind) { font-size: 12px !important; }
+  .games .games-tile-copy > small { font-size: 11px !important; }
+  .games .games-fishing-feature { min-height: 200px; padding: 25px 22px; }
+  .games .games-fishing-feature h2 { font-size: 27px; max-width: 12ch; }
+  .games .games-fishing-feature p { font-size: 12px; }
+  .games .games-fishing-feature > img { width: 54%; }
+  .games .games-wallet { padding: 16px; }
+  .games .games-wallet-main strong { font-size: 24px; }
+  .game-session-layout { grid-template-columns: 1fr; gap: 8px; }
+  .game-stage { position: static; }
+  .games .game-stage > .games-scene { height: clamp(280px, 80vw, 380px) !important; min-height: 260px !important; border-radius: 14px !important; }
+  .games.is-playing .games-game-heading { gap: 8px 14px; padding: 16px 0 20px; }
+  .games.is-playing .games-game-heading h2 { font-size: 27px !important; }
+  .games.is-playing .games-game-heading > p { grid-column: 1 / -1; font-size: 12px; }
+  .games.is-playing .games-back { grid-row: 1; font-size: 12px; }
+  .games.is-playing .games-game-body { padding: 20px !important; }
+  .has-live-arena .games-game-body { display: block; }
+  .game-stage-guide { padding: 14px 2px 18px; font-size: 11px; }
+  .games .games-rule-tables { grid-template-columns: 1fr; }
+  .games .fishing-console { padding: 20px 16px; }
+  .games .fishing-tab-content { padding: 18px 16px 22px; }
+  .games .fishing-species { gap: 12px; }
+  .games .fishing-status h3 { font-size: 21px; }
+  .games .fishing-tabs button { font-size: 12px; gap: 5px; }
+}
+@media (max-width: 370px) {
+  .games .games-tile-copy { padding: 11px; }
+  .games .games-tile-copy > strong { font-size: 15px; }
+  .games .games-wallet .games-button { font-size: 11px; padding: 9px; }
+  .games .games-tile-copy > small { font-size: 10px !important; }
+  .games.is-playing .games-game-body { padding: 16px !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .games *, .games *::before, .games *::after { animation: none !important; transition: none !important; }
+}

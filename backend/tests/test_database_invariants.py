@@ -137,6 +137,98 @@ class DatabaseInvariants(unittest.IsolatedAsyncioTestCase):
             await session.rollback()
         self.assertEqual(1000, (await self.service_call("wallet"))["balance"])
 
+    async def ready_local_round(self, round_id):
+        """Advance only fixture DB time, never production or a real wallet."""
+        from app.games.models import GameRound, Wallet
+        async with self.factory() as session:
+            row = await session.get(GameRound, UUID(round_id))
+            row.created_at = datetime.now(timezone.utc) - timedelta(seconds=60)
+            row.expires_at = datetime.now(timezone.utc) + timedelta(minutes=5)
+            row.available_at = datetime.now(timezone.utc) - timedelta(seconds=1)
+            wallet = await session.get(Wallet, self.principal.id)
+            wallet.last_mutation_at = None
+            await session.commit()
+
+    async def test_local_shot_duplicate_finish_credits_exactly_once(self):
+        from sqlalchemy import func, select
+        from app.games.models import WalletLedger
+        from app.games.schemas import StartRound, RoundAction
+        start = await self.service_call("start", StartRound(key="local-shot", game="basketball", bet=10, gameplay_version=1))
+        self.assertEqual("active", start["status"])
+        self.assertIsNone(start["result"])
+        self.assertEqual(990, start["balance"])
+        await self.ready_local_round(start["id"])
+        c = start["state"]
+        action = RoundAction(key="finish-shot", action="finish", version=1, shot={"aim_x": c["target_x"] - c["wind"], "aim_y": c["target_y"], "power": 650, "ticks": 180})
+        results = await asyncio.gather(*(self.service_call("action", UUID(start["id"]), action) for _ in range(4)))
+        self.assertTrue(all(row == results[0] for row in results))
+        self.assertTrue(results[0]["result"]["success"])
+        self.assertEqual(1012, results[0]["balance"])
+        async with self.factory() as session:
+            count = await session.scalar(select(func.count()).select_from(WalletLedger).where(WalletLedger.round_id == UUID(start["id"]), WalletLedger.amount > 0))
+            self.assertEqual(1, count)
+
+    async def test_local_fishing_collect_cannot_bypass_play_and_carp_is_saved_once(self):
+        from fastapi import HTTPException
+        from sqlalchemy import func, select
+        from app.games.models import GameRound, FishingCatch
+        from app.games.schemas import StartRound, RoundAction
+        from app.games import fishing_play
+        start = await self.service_call("start", StartRound(key="local-fish", game="fishing", bet=0, gameplay_version=1))
+        self.assertIsNone(start["result"])
+        self.assertNotIn("species", start["state"])
+        await self.ready_local_round(start["id"])
+        with self.assertRaises(HTTPException) as error:
+            await self.service_call("action", UUID(start["id"]), RoundAction(key="bypass", action="collect", version=1))
+        self.assertEqual("invalid_action", error.exception.detail["code"])
+        async with self.factory() as session:
+            row = await session.get(GameRound, UUID(start["id"]))
+            row.secret_state = {"species": "Карп", "rarity": "rare", "weight_grams": 4200, "value": 60}
+            await session.commit()
+        c = start["state"]
+        hook = fishing_play.bite_tick(c, 0)
+        state, held, events = fishing_play.initial(), False, []
+        for t in range(hook + 1, 601):
+            next_held = held
+            if t == hook + 1 or state["tension"] <= 35:
+                next_held = True
+            elif state["tension"] >= 65:
+                next_held = False
+            if next_held != held:
+                events.append({"tick": t, "held": next_held})
+                held = next_held
+            state = fishing_play.step(state, c, t - hook, held)
+            if state["status"] != "fighting":
+                break
+        self.assertEqual("caught", state["status"])
+        proof = {"cast_x": 0, "cast_tick": 0, "hook_tick": hook, "end_tick": t, "events": events}
+        action = RoundAction(key="land-fish", action="finish_fishing", fishing=proof, version=1)
+        first = await self.service_call("action", UUID(start["id"]), action)
+        repeated = await self.service_call("action", UUID(start["id"]), action)
+        self.assertEqual(first, repeated)
+        self.assertEqual("caught", first["status"])
+        self.assertEqual("Карп", first["result"]["species"])
+        self.assertEqual(1000, first["balance"])
+        inventory = await self.service_call("inventory")
+        self.assertIn("Карп", inventory["collection"])
+        self.assertEqual(4.2, inventory["record_weight"])
+        async with self.factory() as session:
+            count = await session.scalar(select(func.count()).select_from(FishingCatch).where(FishingCatch.round_id == UUID(start["id"])))
+            self.assertEqual(1, count)
+
+    async def test_legacy_request_fingerprint_survives_new_optional_fields(self):
+        from sqlalchemy import select
+        from app.games.models import GameAction
+        from app.games.schemas import StartRound
+        body = StartRound(key="legacy-retry", game="mines", bet=10, mines=3)
+        expected = await self.service_call("start", body)
+        old_parameters = {k: v for k, v in body.model_dump().items() if k not in {"key", "gameplay_version"}}
+        encoded = __import__("json").dumps({"operation": "rounds", "parameters": old_parameters}, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+        async with self.factory() as session:
+            journal = await session.scalar(select(GameAction).where(GameAction.user_id == self.principal.id, GameAction.key == "legacy-retry"))
+            self.assertEqual(hashlib.sha256(encoded.encode()).hexdigest(), journal.fingerprint)
+        self.assertEqual(expected, await self.service_call("start", body))
+
 
 if __name__ == "__main__":
     unittest.main()

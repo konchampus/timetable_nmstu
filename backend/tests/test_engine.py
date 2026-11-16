@@ -12,7 +12,8 @@ class EngineRules(unittest.TestCase):
         self.assertEqual(12, len(items))
         for item in items:
             self.assertTrue(item["rules"])
-            self.assertTrue(item["probabilities"])
+            if item.get("gameplay_version") != 1:
+                self.assertTrue(item["probabilities"])
             self.assertEqual(1, item["rules_version"])
             self.assertEqual(0 if item["id"] == "fishing" else 10, item["min_bet"])
 
@@ -98,6 +99,26 @@ class EngineRules(unittest.TestCase):
             previous = current
         self.assertEqual(2, engine.adjacent_mines(0, [1, 5, 24]))
         self.assertEqual(0, engine.adjacent_mines(0, [24]))
+
+    def test_carp_is_a_distinct_catch_and_catalog_preserves_rarity_odds(self):
+        species = [fish[0] for fish in engine.FISH]
+        self.assertIn("Карп", species)
+        self.assertIn("Карась", species)
+        self.assertEqual(6, len(set(species)))
+        index = species.index("Карп")
+        for level, weights in enumerate(engine.FISH_WEIGHTS, 1):
+            self.assertEqual(len(engine.FISH), len(weights))
+            cursor = sum(weights[:index])
+            with patch.object(engine.RNG, "randrange", return_value=cursor), patch.object(engine.RNG, "randint", return_value=8000):
+                result = engine.fishing_result(level)
+                self.assertEqual("Карп", result["species"])
+                self.assertEqual(8000, result["weight_grams"])
+        fishing = next(item for item in engine.catalog() if item["id"] == "fishing")
+        for level, weights in enumerate(engine.FISH_WEIGHTS, 1):
+            for rarity in {fish[1] for fish in engine.FISH}:
+                expected = sum(weights[i] for i, fish in enumerate(engine.FISH) if fish[1] == rarity) / 100
+                self.assertEqual(expected, fishing["probabilities"][f"rod_{level}_{rarity}"])
+            self.assertGreater(fishing["probabilities"][f"rod_{level}_species_Карп"], 0)
 
     def test_fishing_weights_and_each_rarity(self):
         for level, weights in enumerate(engine.FISH_WEIGHTS, 1):

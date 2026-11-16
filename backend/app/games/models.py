@@ -15,11 +15,15 @@ class Wallet(Base):
         CheckConstraint("balance >= 0", name="ck_game_wallet_balance"),
         CheckConstraint("rod_level BETWEEN 1 AND 5", name="ck_game_rod_level"),
         CheckConstraint("record_grams BETWEEN 0 AND 12000", name="ck_game_record_weight"),
-        CheckConstraint("jsonb_typeof(collected_species) = 'array' AND jsonb_array_length(collected_species) <= 5", name="ck_game_collection_shape"),
+        CheckConstraint("jsonb_typeof(collected_species) = 'array' AND jsonb_array_length(collected_species) <= 7", name="ck_game_collection_shape"),
+        CheckConstraint("fishing_location IN ('shore','river','mountain','golden')", name="ck_game_fishing_location"),
+        CheckConstraint("fishing_skin IN ('angler','bear')", name="ck_game_fishing_skin"),
     )
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     balance: Mapped[int] = mapped_column(BigInteger, nullable=False, default=0)
     rod_level: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    fishing_location: Mapped[str] = mapped_column(String(20), nullable=False, default="shore", server_default="shore")
+    fishing_skin: Mapped[str] = mapped_column(String(20), nullable=False, default="angler", server_default="angler")
     collected_species: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list)
     record_grams: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     last_mutation_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
