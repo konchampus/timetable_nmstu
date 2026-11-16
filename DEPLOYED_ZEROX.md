@@ -74,6 +74,19 @@
 Ключ и копии не публиковались и не скачивались. Внешнее backup-хранилище, автоматическое расписание backup и проверка восстановления не настроены/не выполнялись.
 
 Автоматические suites, нагрузочные/security/concurrency испытания, приёмка всех 12 игр и пользовательский сценарий авторизации внутри Telegram не запускались. Работоспособность всего продукта не выводится из health-check: подтверждены перечисленные сборка, развёртывание и конкретные живые обращения поиска/расписания.
+## Локальные игры и тематическая рыбалка · 2026-11-16
+
+- Исходный коммит `b52a289a3fa00fc978af076c354bab4aa9632f64` опубликован в `feat/client-gameplay-and-calendar`. Push выполнен существующим SSH-ключом; remote URL и глобальная Git/SSH-конфигурация не менялись.
+- API: `magtu-companion-backend:games-b52a289`, web: `magtu-companion-web:games-b52a289`. Образы собраны на сервере из точного git archive, отдельно от bot/worker; их общий тег backend:local не переназначался.
+- До миграции создана age-копия: `/var/backups/magtu-companion/magtu-20261116T180246Z-2531939.dump.age`, права 0600. Ключ не читался и не переносился.
+- Alembic: `0003_fishing_world (head)`. Только добавлены предпочтения и расширен лимит коллекции до 7. Никакого сброса баланса, снастей, рыбы, раундов, рейтинга, заметок или настроек не выполнялось.
+- Первый ранний probe получил curl 56 (connection reset при запуске nginx) и автоматически вернул прежние API/web без downgrade БД. После отдельного запуска нового API подтверждены readiness 200 и анонимный доступ к приватному каталогу 401. Исправлен ограниченный startup-retry (`--retry-all-errors`), повторное переключение завершилось успешно.
+- bot, worker и PostgreSQL сохранили точные container IDs из pre-release снимка. API/web running, restarts=0 при финальной проверке. Прежние образы сохранены с тегами `pre-games-b52a289`.
+- Release source: `/opt/magtu-companion-releases/b52a289a3fa00fc978af076c354bab4aa9632f64`. Симлинк `/opt/magtu-companion-releases/current` указывает на него. Штатная команда `magtu-companion` условно добавляет `current/games.override.yaml`, поэтому дальнейший restart сохраняет раздельные API/web образы и не заменяет Telegram-релиз. Исходный wrapper сохранён в release-каталоге.
+- Основной checkout `/opt/magtu-companion` по-прежнему на a83a115: он не отражает код работающих контейнеров. Не запускать общий build/restart с переименованием backend:local из этого checkout.
+- Внешняя главная: HTTPS 200; `/api/health`: `{"status":"ok"}`. Browser открыл публичную гостевую страницу. Полный Telegram login/gameplay, реальные игровые мутации, восстановление backup и автоматические тестовые suites не выполнялись. Узкие read-only ревью миграции/экономики и cutover-скриптов двумя субагентами не нашли критических блокеров; это не интеграционные тесты.
+- Возможности и пределы релиза: [рыбалка и UX](<FISHING_WORLD.md>). На main ветка автоматически не сливалась.
+
 ## Web-only редизайн · 2026-11-16
 
 - Feature branch feat/companion-mini-app-redesign, source commit 5d8b66a6fd7993e839e2278bec5c1095a22834b4. Собран архив точного commit; production image: magtu-companion-web:mini-app-5d8b66a.
