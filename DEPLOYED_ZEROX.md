@@ -1,4 +1,18 @@
-# Фактическое развёртывание · 16.11.2026
+# Фактическое развёртывание
+
+## Пруд Карпа и серверные квоты · 17.11.2026
+
+- Прямое разрешение пользователя: «залевай». Выпущен [679004d](https://github.com/konchampus/timetable_nmstu/commit/679004db3d6b0bc271cbc8f7a4a04d45b57f96c7), ветка feat/carp-pond-progression (основная реализация — 1f65ad6; 679004d фиксирует старый wire payload в DB regression).
+- На zerox-prod обновлены только API/web: magtu-companion-backend:carp-679004d и magtu-companion-web:carp-679004d. Current указывает на /opt/magtu-companion-releases/679004db3d6b0bc271cbc8f7a4a04d45b57f96c7.
+- Создана зашифрованная backup-точка штатным backup.sh (04:14 UTC). Применена добавочная миграция 0004_fishing_progression поверх 0003. Никаких reset/TRUNCATE/DELETE пользовательских данных не выполнялось.
+- До production: 58 offline tests, 15 replay-векторов рыбалки, 16 спортивных векторов; 9 PostgreSQL integration tests на одноразовой внутренней сети и tmpfs-БД; репетиция 0003 → 0004 сохранила синтетические баланс/снасти/улов/активный раунд/заметку. Тестовые контейнер и сеть удалены.
+- В production проверены права SELECT/INSERT/UPDATE/DELETE новой таблицы runtime-ролью без CREATE, startup отдельного API probe без host-port, health 200 и private catalog 401. Probe удалён до переключения.
+- Контейнерные ID bot/worker/postgres совпали с pre-release снимком. Прежние образы сохранены как pre-carp-679004d; rollback приложения не должен откатывать схему и терять квоты.
+- Внешние HTTPS / и /api/health — 200; health status=ok. index-DSjbJ2eE.js и Games-DE2G_XaY.js доступны, игровые ресурсы содержат Пруд Карпа и метаданные Пыялы, dev auth-маркер отсутствует. API/web restarts=0, в последних 5 мин просмотренных логов ERROR/CRITICAL/Traceback=0. Публичная страница осмотрена browser_* после refresh.
+- Технические остановки до cutover: исправлены merge connect_args в операторском скрипте и чтение SSH stdin командой compose run; первая остановка не изменила схему, после второй схема уже была 0004, но старые API/web продолжали работать до завершения preflight. Откат/сброс данных не понадобился.
+- Реальные пользовательские раунды и Telegram iOS/Android не выполнялись. Музыка не скачивалась: плеер без файла отключён.
+
+## История · 16.11.2026
 
 - Сервер: zerox-prod. vices-prod не отвечает по SSH; на нём ничего не менялось, бот коллоквиума не остановлен.
 - Mini App: https://timetaaaas2ble.chickenkiller.com/
