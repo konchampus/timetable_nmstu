@@ -12,9 +12,10 @@ def step(state: dict, challenge: dict, tick: int, held: bool) -> dict:
     if state["status"] != "fighting":
         return state
     wave = ((tick + challenge["surge"]) // 16) % 4
-    pull = (2, 4, 1, 3)[wave]
+    tier = challenge.get("boss_tier", 0)
+    pull = (2, 4, 1, 3)[wave] + tier
     tension = max(0, state["tension"] + (2 + pull if held else -6))
-    progress = max(0, state["progress"] + (10 + challenge["rod_level"] if held and 28 <= tension <= 78 else -3))
+    progress = max(0, state["progress"] + (10 + challenge["rod_level"] - 2 * tier if held and 28 <= tension <= 78 else -3))
     slack = state["slack"] + 1 if tension < 8 else 0
     status, reason = "fighting", ""
     if tension >= 100:

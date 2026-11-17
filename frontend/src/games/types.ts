@@ -8,12 +8,15 @@ export interface GameInfo { fishing_world_version?:1|null; gameplay_version?: 1 
 export interface Round { id: string; game: GameId; status: 'active' | 'won' | 'lost' | 'push' | 'caught' | 'expired'; bet: number; payout: number; balance: number; version: number; created_at: string; available_at?: string | null; state: Record<string, unknown>; result: Record<string, unknown> | null; rules_version?: number | string; }
 export interface Wallet { balance: number; inventory_value: number; daily_available: boolean; rod_level: number; }
 export interface Catch { species: string; rarity: string; count: number; value: number; weight: number; }
-export type FishingLocationId = 'shore'|'river'|'mountain'|'golden';
+export type FishingLocationId = 'shore'|'carp'|'river'|'mountain'|'golden';
+export type FishingPlayMode = 'regular'|'boss';
+export interface FishingBoss { id:string; title:string; description:string; tier:number; min_rod_level:number; reward_species:string; reward_value:number; }
+export interface GameplayLimits { policy_version:1; regular_attempts_remaining:number; regular_catches_remaining:number; boss_attempts_remaining:number; sport_rounds_remaining:number; claimed_bosses:string[]; next_cast_at:string|null; resets_at:string; server_now:string; regular_daily_limit:number; regular_attempt_daily_limit:number; boss_daily_limit:number; sports_daily_limit:number; cast_cooldown_seconds:number; }
 export type FishingSkinId = 'angler'|'bear';
 export interface LocationFish { species:string; rarity:string; value:number; min_weight:number; max_weight:number; probability:number; }
-export interface FishingLocation { id:FishingLocationId; title:string; description:string; tagline?:string; story_title?:string; story?:string; landmark?:string; featured_species?:string[]; min_rod_level:number; unlocked:boolean; value_multiplier:number; theme:string; preview_rod_level:number; fish:LocationFish[]; }
+export interface FishingLocation { id:FishingLocationId; title:string; description:string; tagline?:string; story_title?:string; story?:string; landmark?:string; featured_species?:string[]; min_rod_level:number; unlocked:boolean; value_multiplier:number; theme:string; preview_rod_level:number; fish:LocationFish[]; boss?:FishingBoss|null; }
 export interface FishingSkin { id:FishingSkinId; title:string; description:string; min_rod_level:number; unlocked:boolean; }
-export interface Inventory { items: Catch[]; rod_level: number; upgrade_cost?: number | null; next_upgrade_cost?: number | null; max_rod_level?: number; collection?: string[]; record_weight?: number; world_version?:1; selected_location?:FishingLocationId; selected_skin?:FishingSkinId; locations?:FishingLocation[]; skins?:FishingSkin[]; species?:{name:string;rarity:string}[]; }
+export interface Inventory { items: Catch[]; rod_level: number; upgrade_cost?: number | null; next_upgrade_cost?: number | null; max_rod_level?: number; collection?: string[]; record_weight?: number; world_version?:1; selected_location?:FishingLocationId; selected_skin?:FishingSkinId; locations?:FishingLocation[]; skins?:FishingSkin[]; species?:{name:string;rarity:string}[]; limits?:GameplayLimits; }
 export interface Leaderboard { items: {rank: number; nickname: string; score: number}[]; self: {rank: number | null; score: number}; }
 export const points = (value: number) => new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 4 }).format(value);
 export const numberValue = (data: Record<string, unknown> | null, key: string, fallback = 0): number => typeof data?.[key] === 'number' ? data[key] as number : fallback;

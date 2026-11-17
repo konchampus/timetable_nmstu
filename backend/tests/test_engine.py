@@ -104,7 +104,7 @@ class EngineRules(unittest.TestCase):
         species = [fish[0] for fish in engine.FISH]
         self.assertIn("Карп", species)
         self.assertIn("Карась", species)
-        self.assertEqual(6, len(set(species)))
+        self.assertEqual(7, len(set(species)))
         index = species.index("Карп")
         for level, weights in enumerate(engine.FISH_WEIGHTS, 1):
             self.assertEqual(len(engine.FISH), len(weights))
@@ -125,6 +125,8 @@ class EngineRules(unittest.TestCase):
             self.assertEqual(100, sum(weights))
             cursor = 0
             for index, weight in enumerate(weights):
+                if weight == 0:
+                    continue
                 with patch.object(engine.RNG, "randrange", return_value=cursor), patch.object(engine.RNG, "randint", return_value=engine.FISH[index][3]):
                     result = engine.fishing_result(level)
                     self.assertEqual(engine.FISH[index][0], result["species"])

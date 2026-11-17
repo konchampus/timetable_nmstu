@@ -43,6 +43,21 @@ LOCATIONS = {
         "min_rod_level": 5, "value_multiplier": Fraction(3), "weights": (0, 8, 25, 17, 25, 13, 12), "theme": "golden",
     },
 }
+# Trophies use existing species; titles are narrative metadata, never new species.
+BOSSES = {
+    "carp": {"id": "old_carp", "title": "Старый Карп", "description": "В тумане пруда старый карп проверяет терпение рыбака.", "tier": 1, "min_rod_level": 2, "reward_species": "Карп", "reward_value": 500},
+    "river": {"id": "loop_guardian", "title": "Страж петли", "description": "Щука охраняет последний изгиб реки рекурсии.", "tier": 1, "min_rod_level": 3, "reward_species": "Щука", "reward_value": 750},
+    "mountain": {"id": "deep_host", "title": "Хозяин глубины", "description": "Под затонувшей лодкой просыпается огромный сом.", "tier": 2, "min_rod_level": 4, "reward_species": "Сом", "reward_value": 1200},
+    "golden": {"id": "commit_keeper", "title": "Хранитель коммита", "description": "Золотой карп бережёт последнее исправление у тихой заводи.", "tier": 3, "min_rod_level": 5, "reward_species": "Золотой карп", "reward_value": 1800},
+}
+LOCATIONS["carp"] = {
+    "title": "Пруд Карпа", "tagline": "Туманная байка · старый карп",
+    "description": "Туманный пруд, где чаще встречается карп; стоимость обычного улова ×1,25.",
+    "story_title": "Тот, кто помнит туман",
+    "story": "К рассвету туман скрывает дальний берег. Говорят, старый карп помнит каждый заброс и выходит к причалу лишь к терпеливым рыбакам. Вода едва дрогнет — и снова тишина. Здесь рассказывают вымышленную байку, а не обещают встречу.",
+    "landmark": "Старый причал, растворяющийся в тумане", "featured_species": ["Карп", "Карась"],
+    "min_rod_level": 2, "value_multiplier": Fraction(5, 4), "weights": (15, 25, 38, 10, 8, 3, 1), "theme": "carp",
+}
 SKINS = {
     "angler": {"title": "Рыбак", "description": "Классическая удочка без персонажа в кадре.", "min_rod_level": 1},
     "bear": {"title": "Медведь", "description": "Медведь на причале. Только внешний вид, без бонуса к улову.", "min_rod_level": 3},
@@ -66,6 +81,7 @@ def public_world(level: int, fish: tuple, shore_weights: tuple, selected_locatio
                           "min_rod_level": location["min_rod_level"], "unlocked": level >= location["min_rod_level"],
                           "value_multiplier": float(location["value_multiplier"]), "theme": location["theme"],
                           "preview_rod_level": preview_level,
+                          **({"boss": dict(BOSSES[id_])} if id_ in BOSSES else {}),
                           "fish": [{"species": item[0], "rarity": item[1],
                                     "value": int(item[2] * location["value_multiplier"]),
                                     "min_weight": item[3] / 1000, "max_weight": item[4] / 1000,

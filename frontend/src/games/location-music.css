@@ -1,0 +1,16 @@
+.location-music { padding: 18px 24px; border-bottom: 1px solid var(--games-line); display: grid; gap: 12px; background: var(--games-bg); }
+.location-music-track { display: flex; gap: 12px; align-items: center; color: var(--games-ink); }
+.location-music-track > svg { color: var(--games-accent); }
+.location-music-track > div { display: grid; gap: 5px; min-width: 0; }
+.location-music-track strong { font-size: 15px; }
+.location-music-track strong span { color: var(--games-muted); margin-left: 8px; font-size: 13px; font-weight: 500; }
+.location-music-track small { font-size: 12px; color: var(--games-muted); }
+.location-music-controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; }
+.location-music-controls button { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; min-width: 120px; padding: 10px 16px; border: 1px solid var(--games-line); border-radius: 10px; background: var(--games-soft); color: var(--games-accent); font-size: 13px; font-weight: 650; }
+.location-music-controls label { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--games-muted); flex: 1; min-width: 160px; max-width: 320px; }
+.location-music-controls input { min-width: 60px; min-height: 36px; flex: 1; width: 100%; accent-color: var(--games-accent); }
+.location-music-controls output { min-width: 36px; font-size: 12px; font-variant-numeric: tabular-nums; }
+.location-music > p { font-size: 12px; line-height: 1.6; color: var(--games-muted); max-width: 70ch; }
+.location-music button:focus-visible,.location-music input:focus-visible { outline: 3px solid var(--games-accent); outline-offset: 3px; }
+.location-music > audio { display: none; }
+@media(max-width:600px) { .location-music { padding: 18px 16px; }.location-music-controls { gap: 8px 14px; }.location-music-controls label { min-width: 140px; } }

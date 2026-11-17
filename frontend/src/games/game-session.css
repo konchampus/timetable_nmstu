@@ -24,7 +24,7 @@
 .games .games-fishing-feature span { font-size: 14px; margin-top: 22px; }
 .games .game-search { min-height: 52px; border-radius: 12px; }
 .games .game-search input { font-size: 15px; }
-.games .game-categories { gap: 8px; }
+.games .game-categories { gap: 8px; flex-wrap: wrap; overflow: visible; }
 .games .game-categories button { min-height: 44px; font-size: 13px; padding: 9px 16px; border-radius: 10px; }
 .games .games-catalog-title { margin: 28px 0 16px; }
 .games .games-catalog-title h2 { font-size: 23px; }

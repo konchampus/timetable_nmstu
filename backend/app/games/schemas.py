@@ -17,8 +17,9 @@ class StartRound(Mutation):
     choice: str | None = Field(default=None, max_length=30)
     mines: int | None = Field(default=None, strict=True, ge=1, le=10)
     gameplay_version: Literal[1] | None = None
-    location: Literal["shore", "river", "mountain", "golden"] | None = None
+    location: Literal["shore", "river", "mountain", "golden", "carp"] | None = None
     skin: Literal["angler", "bear"] | None = None
+    fishing_mode: Literal["regular", "boss"] | None = None
 
     @model_validator(mode="after")
     def game_parameters(self) -> "StartRound":
@@ -38,8 +39,8 @@ class StartRound(Mutation):
             raise ValueError("В этой игре choice не используется")
         if self.game != "mines" and self.mines is not None:
             raise ValueError("mines используется только в сапёре")
-        if (self.location is not None or self.skin is not None) and (self.game != "fishing" or self.gameplay_version != 1):
-            raise ValueError("Локация и скин доступны только в рыбалке с локальной механикой")
+        if (self.location is not None or self.skin is not None or self.fishing_mode is not None) and (self.game != "fishing" or self.gameplay_version != 1):
+            raise ValueError("Локация, скин и режим доступны только в рыбалке с локальной механикой")
         return self
 
 
@@ -192,6 +193,33 @@ class LocationFish(BaseModel):
     probability: float
 
 
+class FishingBoss(BaseModel):
+    id: str
+    title: str
+    description: str
+    tier: int = Field(ge=1, le=3)
+    min_rod_level: int = Field(ge=1, le=5)
+    reward_species: str
+    reward_value: int = Field(gt=0)
+
+
+class FishingLimits(BaseModel):
+    policy_version: Literal[1] = 1
+    regular_attempts_remaining: int = Field(ge=0)
+    regular_catches_remaining: int = Field(ge=0)
+    boss_attempts_remaining: int = Field(ge=0)
+    sport_rounds_remaining: int = Field(ge=0)
+    claimed_bosses: list[str]
+    next_cast_at: str | None
+    resets_at: str
+    server_now: str
+    regular_daily_limit: Literal[10] = 10
+    regular_attempt_daily_limit: Literal[25] = 25
+    boss_daily_limit: Literal[3] = 3
+    sports_daily_limit: Literal[40] = 40
+    cast_cooldown_seconds: Literal[45] = 45
+
+
 class FishingLocation(BaseModel):
     id: str
     title: str
@@ -207,6 +235,7 @@ class FishingLocation(BaseModel):
     theme: str
     preview_rod_level: int
     fish: list[LocationFish]
+    boss: FishingBoss | None = None
 
 
 class FishingSkin(BaseModel):
@@ -230,6 +259,7 @@ class InventoryResponse(BaseModel):
     locations: list[FishingLocation]
     skins: list[FishingSkin]
     species: list[FishingSpecies]
+    limits: FishingLimits
 
 
 class LeaderboardItem(BaseModel):

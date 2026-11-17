@@ -1,6 +1,7 @@
 import {useEffect,useState} from 'react';
-import {BookOpen,Check,Code2,Fish,GitCommitHorizontal,LockKeyhole,Mountain,PawPrint,UserRound,ChevronDown} from 'lucide-react';
-import {points,type Inventory,type FishingLocationId,type FishingSkinId} from './types';
+import {BookOpen,Check,Code2,Fish,GitCommitHorizontal,LockKeyhole,Mountain,PawPrint,UserRound,ChevronDown,Waves} from 'lucide-react';
+import {points,type Inventory,type FishingLocationId,type FishingSkinId,type FishingPlayMode} from './types';
+import FishingBossPanel from './FishingBossPanel';
 
 interface Props {
   inventory:Inventory|null;
@@ -8,13 +9,15 @@ interface Props {
   skin:FishingSkinId;
   disabled:boolean;
   locked:boolean;
+  mode?:FishingPlayMode;
+  onModeChange?:(mode:FishingPlayMode)=>void;
   onChange:(value:{location:FishingLocationId;skin:FishingSkinId})=>void;
 }
-const locationIcons={shore:Fish,river:Code2,mountain:Mountain,golden:GitCommitHorizontal};
-export default function FishingSetup({inventory,location,skin,disabled,locked,onChange}:Props){
+const locationIcons={shore:Fish,carp:Waves,river:Code2,mountain:Mountain,golden:GitCommitHorizontal};
+export default function FishingSetup({inventory,location,skin,disabled,locked,onChange,mode='regular',onModeChange}:Props){
   const [previewId,setPreviewId]=useState<FishingLocationId|null>(null);
   useEffect(()=>setPreviewId(null),[location]);
-  const locations=inventory?.locations??[],skins=inventory?.skins??[];
+  const locations=[...(inventory?.locations??[])].sort((a,b)=>a.min_rod_level-b.min_rod_level),skins=inventory?.skins??[];
   const chosen=locations.find(item=>item.id===location);
   const preview=locations.find(item=>item.id===previewId)??chosen;
   if(inventory?.world_version!==1)return <p className="fishing-world-unavailable" role="status">Новые локации появятся после обновления сервера. Пока доступен обычный берег.</p>;
@@ -25,14 +28,14 @@ export default function FishingSetup({inventory,location,skin,disabled,locked,on
     </div>
     <div className="fishing-destinations" role="group" aria-label="Локации и их истории">
       {locations.map(item=>{
-        const Icon=locationIcons[item.id];
+        const Icon=locationIcons[item.id]??Fish;
         return <button type="button" key={item.id} className={'fishing-destination destination-'+item.theme+(preview?.id===item.id?' is-preview':'')}
           aria-pressed={location===item.id} aria-controls="fishing-location-description" disabled={disabled||locked}
           onClick={()=>{setPreviewId(item.id);if(item.unlocked)onChange({location:item.id,skin});}}>
           <span className="destination-landscape" aria-hidden="true"><Icon size={28}/>{location===item.id?<Check size={18}/>:!item.unlocked?<LockKeyhole size={18}/>:null}</span>
           <strong>{item.title}</strong>
           {item.tagline&&<span className="destination-theme">{item.tagline}</span>}
-          <span>{item.unlocked?'Доступна · выбрать':'С '+item.min_rod_level+' ур. · посмотреть'}</span>
+          <span>{location===item.id?'Выбрана':item.unlocked?'Доступна · выбрать':'С '+item.min_rod_level+' ур. · посмотреть'}</span>
           <b>Стоимость улова ×{points(item.value_multiplier)}</b>
         </button>;
       })}
@@ -55,6 +58,7 @@ export default function FishingSetup({inventory,location,skin,disabled,locked,on
         </div>)}</div>
       </details>
     </div>}
+    <FishingBossPanel location={chosen} inventory={inventory} mode={mode} onModeChange={onModeChange} disabled={disabled} locked={locked}/>
     <fieldset className="fishing-skins" disabled={disabled||locked}>
       <legend>Ваш персонаж <span>Только внешний вид, без бонусов</span></legend>
       <div>{skins.map(item=><label key={item.id}>
@@ -62,6 +66,6 @@ export default function FishingSetup({inventory,location,skin,disabled,locked,on
         <span>{item.id==='bear'?<PawPrint size={22}/>:<UserRound size={22}/>}<span><strong>{item.title}</strong><small>{item.unlocked?'Бесплатно':'Удочка '+item.min_rod_level+' ур.'}</small></span>{!item.unlocked?<LockKeyhole size={16}/>:skin===item.id?<Check size={18}/>:null}</span>
       </label>)}</div>
     </fieldset>
-    {!locked&&<p className="fishing-selection-note">Следующий заброс: <strong>{chosen?.title??'Пруд старого карася'}</strong> · {skins.find(item=>item.id===skin)?.title??'Рыбак'}. Выбор сохранится на сервере при забросе.</p>}
+    {!locked&&<p className="fishing-selection-note">Следующий заброс: <strong>{chosen?.title??'Пруд старого карася'}</strong> · {skins.find(item=>item.id===skin)?.title??'Рыбак'} · {mode==='boss'?'вызов босса':'обычная ловля'}. Выбор сохранится при забросе.</p>}
   </section>;
 }

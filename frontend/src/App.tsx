@@ -42,6 +42,6 @@ function AuthenticatedApp({initialUser,onUserChange,onDeleted}:{initialUser:User
  {tab==='search'&&<Search home={user.settings.home_entity} onSelect={selectEntity} onHome={chooseHome}/>}
  {tab==='profile'&&<Profile user={user} onSaved={applySettings} onGroup={()=>navigate('search')} onNotes={()=>{setNoteContext(null);setNotesOpen(true);}} onDeleted={onDeleted}/>}
  </>}
- {gamesOpened&&<section hidden={tab!=='games'||notesOpen} className="games-host" aria-label="Игровой раздел"><Boundary><Suspense fallback={<p role="status">Подготавливаем игровые сцены…</p>}><Games initialGame={requestedGame} sound={user.settings.sound} haptics={user.settings.haptics} onSoundChange={enabled=>void soundChange(enabled)}/></Suspense></Boundary>{tab==='games'&&error&&<p role="alert" className="error-message">{error}</p>}</section>}
+ {gamesOpened&&<section hidden={tab!=='games'||notesOpen} className="games-host" aria-label="Игровой раздел"><Boundary><Suspense fallback={<p role="status">Подготавливаем игровые сцены…</p>}><Games visible={tab==='games'&&!notesOpen} initialGame={requestedGame} sound={user.settings.sound} haptics={user.settings.haptics} onSoundChange={enabled=>void soundChange(enabled)}/></Suspense></Boundary>{tab==='games'&&error&&<p role="alert" className="error-message">{error}</p>}</section>}
  </main><nav className="bottom-nav" aria-label="Основные вкладки">{tabs.map(({id,label,Icon})=><button key={id} aria-current={tab===id&&!notesOpen?'page':undefined} onClick={()=>navigate(id)}><Icon size={22}/><span>{label}</span></button>)}</nav></div></div>;
 }

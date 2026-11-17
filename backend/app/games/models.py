@@ -16,7 +16,7 @@ class Wallet(Base):
         CheckConstraint("rod_level BETWEEN 1 AND 5", name="ck_game_rod_level"),
         CheckConstraint("record_grams BETWEEN 0 AND 12000", name="ck_game_record_weight"),
         CheckConstraint("jsonb_typeof(collected_species) = 'array' AND jsonb_array_length(collected_species) <= 7", name="ck_game_collection_shape"),
-        CheckConstraint("fishing_location IN ('shore','river','mountain','golden')", name="ck_game_fishing_location"),
+        CheckConstraint("fishing_location IN ('shore','river','mountain','golden','carp')", name="ck_game_fishing_location"),
         CheckConstraint("fishing_skin IN ('angler','bear')", name="ck_game_fishing_skin"),
     )
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
@@ -93,6 +93,22 @@ class DailyClaim(Base):
     user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
     day: Mapped[date] = mapped_column(Date, primary_key=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class GameDailyQuota(Base):
+    """Local-day counters; every access is serialized by the owning User lock."""
+    __tablename__ = "game_daily_quotas"
+    __table_args__ = (
+        CheckConstraint("regular_attempts >= 0 AND regular_catches >= 0 AND boss_attempts >= 0 AND sport_rounds >= 0", name="ck_game_quota_counts"),
+        CheckConstraint("jsonb_typeof(claimed_bosses) = 'array' AND jsonb_array_length(claimed_bosses) <= 4", name="ck_game_quota_bosses"),
+    )
+    user_id: Mapped[int] = mapped_column(BigInteger, ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    day: Mapped[date] = mapped_column(Date, primary_key=True)
+    regular_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    regular_catches: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    boss_attempts: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    sport_rounds: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default="0")
+    claimed_bosses: Mapped[list[str]] = mapped_column(JSONB, nullable=False, default=list, server_default=text("'[]'::jsonb"))
 
 
 class FishingCatch(Base):

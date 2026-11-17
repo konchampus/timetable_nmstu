@@ -1,0 +1,12 @@
+import type {Entity,Settings,User,Schedule,Note} from '../lib/types';
+import type {Round,GameId,Inventory} from '../games/types';
+import world from '../games/fishing-world.fixture.json';
+export const group:Entity={id:'demo-group',name:'ДЕМО-26-2 (1 подгр.)',kind:'group',url:'#'};
+export const teacher:Entity={id:'demo-teacher',name:'Демонстрационный преподаватель',kind:'teacher',url:'#'};
+export const settings:Settings={version:1,home_entity:group.id,home_name:group.name,notifications_enabled:true,before_minutes:[10],morning_enabled:true,morning_time:'07:00',evening_enabled:true,evening_time:'20:00',changes_enabled:true,end_enabled:false,quiet_start:'22:00',quiet_end:'07:00',weekdays:[0,1,2,3,4],paused_until:null,theme:'auto',sound:false,haptics:false,leaderboard_visible:false,nickname:'Демо-игрок'};
+export const demoUser:User={id:999999,account_generation:'ui-lab-memory-only',name:'Демо-пользователь',settings};
+export const schedule:Schedule={entity:group,fetched_at:new Date().toISOString(),stale:false,template:true,current_week:1,timezone:'Asia/Yekaterinburg',lessons:([1,2] as const).flatMap(week=>Array.from({length:6},(_,weekday)=>[1,2,3].map((number)=>({id:`demo-${week}-${weekday}-${number}`,week,weekday,number,title:['Линейная алгебра и аналитическая геометрия','Информатика','Практическое занятие по физике'][number-1],kind:number===2?'Практика':'Лекция',start:['08:30','10:15','12:00'][number-1],end:['10:00','11:45','13:30'][number-1],room:'Демо-корпус · 301',teachers:[teacher],groups:[group]}))).flat())};
+export const initialNotes:Note[]=[{id:'demo-note',version:1,title:'Демонстрационное домашнее задание',text:'Решить пример из демонстрационной методички. Не реальные данные.',kind:'homework',date:new Date().toISOString().slice(0,10),lesson_id:null,source_entity:null,lesson_status:'unlinked',subject:'Алгебра',done:false,updated_at:new Date().toISOString()}];
+export const catalog=world.catalog;
+export const inventory=world.levels[2] as Inventory;
+export function makeRound(game:GameId):Round{return {id:'demo-'+game,game,status:'active',bet:game==='fishing'?0:10,payout:0,balance:1200,version:1,created_at:new Date().toISOString(),state:game==='fishing'?{gameplay_version:1,bite_tick:90,shoal_x:-250,surge:7,rod_level:3,location:'shore',skin:'angler'}:game==='blackjack'?{player:['AS','7H'],dealer:['10D','?'],player_total:18,dealer_total:10}:game==='mines'?{cells:[0,1,6],values:{0:0,1:1,6:2},mines_count:3,multiplier:1.2}:{gameplay_version:1,wind:-85,target_x:120,target_y:-70},result:null};}

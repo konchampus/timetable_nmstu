@@ -80,7 +80,10 @@ export function useGames(onBalanceChange?: (balance: number) => void) {
     } catch(cause:unknown) {
       if(!alive.current)return null;
       const status=cause instanceof ApiError?cause.status:0;
-      const retryable=status===401||status===408||status===429||(status===409&&cause instanceof ApiError&&['busy','retry_transaction'].includes(cause.code??''));
+      // These are authoritative rejections before any write, not an unknown outcome.
+      // Keeping them pending would lock all games until tomorrow's quota reset.
+      const quotaRejected=status===429&&cause instanceof ApiError&&['fishing_cooldown','boss_claimed','boss_daily_limit','fishing_catch_daily_limit','fishing_attempt_daily_limit','sports_daily_limit'].includes(cause.code??'');
+      const retryable=status===401||status===408||(status===429&&!quotaRejected)||(status===409&&cause instanceof ApiError&&['busy','retry_transaction','transaction_retry'].includes(cause.code??''));
       if(status>=400&&status<500&&!retryable) {
         pendingRef.current=null;setPending(null);savePending(null);
         await refresh();
@@ -106,7 +109,7 @@ export function useGames(onBalanceChange?: (balance: number) => void) {
     catch(cause){if(alive.current)setError(errorMessage(cause)+' Не удалось открыть раунд. Попробуйте ещё раз.');return null;}
   },[refresh]);
   const action=useCallback((round:Round,action:string,cell?:number)=>mutate('/games/rounds/'+encodeURIComponent(round.id)+'/actions',{action,version:round.version,...(cell!==undefined?{cell}:{})},'Действие: '+action,round.id),[mutate]);
-  const start=useCallback((game:GameId,bet:number,choice?:string,mines?:number,gameplayVersion?:1,fishing?:{location:FishingLocationId;skin:FishingSkinId})=>mutate('/games/rounds',{game,bet,...(game==='fishing'&&fishing?fishing:{}),...(choice?{choice}:{}),...(mines!==undefined?{mines}:{}),...(gameplayVersion?{gameplay_version:gameplayVersion}:{})},'Новый раунд'),[mutate]);
+  const start=useCallback((game:GameId,bet:number,choice?:string,mines?:number,gameplayVersion?:1,fishing?:{location:FishingLocationId;skin:FishingSkinId;fishing_mode?:'regular'|'boss'})=>mutate('/games/rounds',{game,bet,...(game==='fishing'&&fishing?fishing:{}),...(choice?{choice}:{}),...(mines!==undefined?{mines}:{}),...(gameplayVersion?{gameplay_version:gameplayVersion}:{})},'Новый раунд'),[mutate]);
   return {...data,loading,busy,pending,error,notice,identityReady,persistentRecovery,walletFresh,historyLoading,hasMoreHistory,loadMoreHistory,refresh,mutate,retry,loadRound,action,start};
 }
 export function errorMessage(cause:unknown){if(cause instanceof ApiError&&cause.status===401)return 'Telegram-сессия истекла. Откройте приложение заново из бота.';if(cause instanceof Error&&cause.name==='AbortError')return 'Сервер не ответил вовремя.';return cause instanceof Error?cause.message:'Нет связи с сервером.';}

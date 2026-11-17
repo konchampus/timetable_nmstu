@@ -20,8 +20,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Settings, User
 from app.security import lock_authenticated_user
-from . import arcade, engine, fishing_play, fishing_world
-from .models import DailyClaim, FishingCatch, GameAction, GameRound, Wallet, WalletLedger
+from . import arcade, engine, fishing_play, fishing_world, limits
+from .models import DailyClaim, FishingCatch, GameAction, GameDailyQuota, GameRound, Wallet, WalletLedger
 from .schemas import RoundAction, StartRound
 
 LOCAL_ZONE = ZoneInfo("Asia/Yekaterinburg")
@@ -37,6 +37,7 @@ class Context:
     wallet: Wallet
     now: datetime
     expired: set[UUID] = field(default_factory=set)
+    quota: GameDailyQuota | None = None
 
 
 class GamesService:
@@ -92,7 +93,7 @@ class GamesService:
 
     async def _mutate(self, operation: str, body: dict, work: Callable[[Context], Awaitable[dict]]) -> dict:
         # New opt-in fields must not change fingerprints of legacy retries.
-        parameters = {k: v for k, v in body.items() if k != "key" and not (k in {"gameplay_version", "shot", "fishing", "location", "skin"} and v is None)}
+        parameters = {k: v for k, v in body.items() if k != "key" and not (k in {"gameplay_version", "shot", "fishing", "location", "skin", "fishing_mode"} and v is None)}
         fingerprint = sha256(json.dumps({"operation": operation, "parameters": parameters}, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode()).hexdigest()
 
         async def execute(context: Context) -> dict:
@@ -224,6 +225,42 @@ class GamesService:
             return {"balance": context.wallet.balance, "sold": totals.quantity}
         return await self._mutate("fishing/sell", {"key": key}, sale)
 
+    async def _quota(self, context: Context) -> GameDailyQuota:
+        # Parent User/Wallet locks serialize row creation and all read/check/increment
+        # operations, including first use after migration and cross-worker requests.
+        if context.quota is not None:
+            return context.quota
+        start, end = limits.day_bounds(context.now)
+        quota = await self.session.get(GameDailyQuota, (self.user_id, start.date()))
+        if quota is None:
+            # Lazy backfill prevents deploying 0004 or creating the first quota row
+            # from resetting today's pre-existing legacy/skill usage.
+            boss_mode = GameRound.public_state["fishing_mode"].astext == "boss"
+            attempts = (await self.session.execute(select(
+                func.count().filter(GameRound.game == "fishing", boss_mode.is_not(True)).label("regular"),
+                func.count().filter(GameRound.game == "fishing", boss_mode).label("boss"),
+                func.count().filter(GameRound.game.in_(arcade.SPORTS), GameRound.public_state["gameplay_version"].astext == "1").label("sports"),
+            ).where(GameRound.user_id == self.user_id, GameRound.created_at >= start, GameRound.created_at < end))).one()
+            catches = int(await self.session.scalar(select(func.count()).select_from(FishingCatch).join(
+                GameRound, GameRound.id == FishingCatch.round_id,
+            ).where(FishingCatch.user_id == self.user_id, FishingCatch.caught_at >= start,
+                    FishingCatch.caught_at < end, boss_mode.is_not(True))) or 0)
+            claimed = (await self.session.scalars(select(GameRound.public_state["boss_id"].astext).join(
+                FishingCatch, FishingCatch.round_id == GameRound.id,
+            ).where(FishingCatch.user_id == self.user_id, FishingCatch.caught_at >= start,
+                    FishingCatch.caught_at < end, boss_mode).distinct())).all()
+            quota = GameDailyQuota(user_id=self.user_id, day=start.date(), regular_attempts=attempts.regular,
+                                   regular_catches=catches, boss_attempts=attempts.boss,
+                                   sport_rounds=attempts.sports, claimed_bosses=sorted(id_ for id_ in claimed if id_))
+            self.session.add(quota)
+        context.quota = quota
+        return quota
+
+    async def _last_cast(self) -> datetime | None:
+        # Across dates, modes and destinations; includes untouched legacy starts.
+        return await self.session.scalar(select(func.max(GameRound.created_at)).where(
+            GameRound.user_id == self.user_id, GameRound.game == "fishing"))
+
     async def inventory(self) -> dict:
         async def read(context: Context) -> dict:
             await self._expire_due(context)
@@ -234,6 +271,7 @@ class GamesService:
             return {"items": [{"species": r["species"], "rarity": r["rarity"], "count": r["count"], "value": r["value"], "weight": r["grams"] / 1000} for r in rows],
                     "rod_level": level, "upgrade_cost": engine.ROD_COST[level - 1] if level < 5 else None,
                     "max_rod_level": 5, "collection": list(context.wallet.collected_species), "record_weight": context.wallet.record_grams / 1000,
+                    "limits": limits.public_limits(await self._quota(context), context.now, await self._last_cast()),
                     **fishing_world.public_world(level, engine.FISH, engine.FISH_WEIGHTS, context.wallet.fishing_location, context.wallet.fishing_skin)}
         return await self._transaction(read)
 
@@ -242,6 +280,24 @@ class GamesService:
             active = await self.session.scalar(select(GameRound.id).where(GameRound.user_id == self.user_id, GameRound.game == body.game, GameRound.status == "active"))
             if active is not None:
                 fail(409, "active_round", "Сначала завершите активный раунд этой игры")
+            boss = None
+            if body.game == "fishing":
+                if body.fishing_mode == "boss":
+                    boss = fishing_world.BOSSES.get(body.location or "shore")
+                    if boss is None:
+                        fail(422, "boss_unavailable", "В этой локации нет босса")
+                    if context.wallet.rod_level < boss["min_rod_level"]:
+                        fail(409, "boss_locked", f"Для босса нужна удочка уровня {boss['min_rod_level']}")
+                quota = await self._quota(context)
+                limits.check_cast(quota, context.now, await self._last_cast(), boss["id"] if boss else None)
+                if boss:
+                    quota.boss_attempts += 1
+                else:
+                    quota.regular_attempts += 1
+            elif body.gameplay_version == 1 and body.game in arcade.SPORTS:
+                quota = await self._quota(context)
+                limits.check_sport(quota)
+                quota.sport_rounds += 1
             round_ = GameRound(id=uuid4(), user_id=self.user_id, game=body.game, status="active", bet=body.bet,
                                payout=0, version=1, rules_version=engine.RULES_VERSION, created_at=context.now,
                                public_state={}, secret_state={})
@@ -268,7 +324,14 @@ class GamesService:
                                        "location": location_id, "location_title": location["title"], "skin": skin_id,
                                        "bite_tick": engine.RNG.randrange(70, 131),
                                        "shoal_x": engine.RNG.randrange(-700, 701), "surge": engine.RNG.randrange(64)}
-                round_.secret_state = engine.fishing_result(level, location_id)
+                round_.public_state = {**round_.public_state, "fishing_mode": "boss" if boss else "regular", "quota_policy_version": 1}
+                if boss:
+                    round_.public_state = {**round_.public_state, "boss_id": boss["id"], "boss_title": boss["title"], "boss_tier": boss["tier"]}
+                    species = next(item for item in engine.FISH if item[0] == boss["reward_species"])
+                    round_.secret_state = {"species": species[0], "rarity": species[1], "value": boss["reward_value"],
+                                           "weight_grams": engine.RNG.randint(species[3], species[4])}
+                else:
+                    round_.secret_state = engine.fishing_result(level, location_id)
                 round_.expires_at = context.now + timedelta(minutes=5)
             elif body.gameplay_version == 1:
                 round_.public_state = {"gameplay_version": 1, "wind": engine.RNG.randrange(-120, 121),
@@ -277,7 +340,7 @@ class GamesService:
                 round_.expires_at = context.now + timedelta(minutes=5)
             elif body.game == "fishing":
                 level = context.wallet.rod_level
-                round_.public_state = {"rod_level": level}
+                round_.public_state = {"rod_level": level, "quota_policy_version": 1}
                 round_.secret_state = engine.fishing_result(level)
                 round_.available_at = context.now + timedelta(seconds=engine.ROD_WAIT[level - 1])
             elif body.game == "mines":
@@ -334,7 +397,7 @@ class GamesService:
                     fail(422, "incomplete_fishing", "Журнал не завершает вываживание")
                 round_.public_state = {**round_.public_state, "fishing": proof, "fight": outcome}
                 if outcome["status"] == "caught":
-                    self._collect(context, round_, gameplay_verified=True)
+                    await self._collect(context, round_, gameplay_verified=True)
                 else:
                     self._settle(context, round_, 0, {"gameplay_version": 1, "reason": outcome["reason"], "escaped": True})
                     round_.status = "lost"
@@ -364,7 +427,7 @@ class GamesService:
                 else:
                     self._reveal(context, round_, body.cell)
             else:
-                self._collect(context, round_)
+                await self._collect(context, round_)
             round_.version += 1
             return self._round_response(round_, context.wallet)
         return await self._mutate(f"rounds/{round_id}/actions", body.model_dump(), act)
@@ -386,9 +449,14 @@ class GamesService:
         if len(cells) == 25 - old["mines_count"]:
             self._cashout(context, round_)
 
-    def _collect(self, context: Context, round_: GameRound, *, gameplay_verified: bool = False) -> None:
+    async def _collect(self, context: Context, round_: GameRound, *, gameplay_verified: bool = False) -> None:
         if not gameplay_verified and (round_.available_at is None or context.now < round_.available_at):
             fail(409, "fishing_not_ready", "Улов ещё не готов")
+        quota = await self._quota(context)
+        boss_id = round_.public_state.get("boss_id") if round_.public_state.get("fishing_mode") == "boss" else None
+        # Pre-0004 active rounds are completable unchanged, but count toward today's
+        # usage. New rounds always enforce the claim-day cap, even across midnight.
+        limits.claim_catch(quota, boss_id, grandfathered=round_.public_state.get("quota_policy_version") != 1)
         fish = round_.secret_state
         self.session.add(FishingCatch(user_id=self.user_id, round_id=round_.id, species=fish["species"], rarity=fish["rarity"], value=fish["value"], weight_grams=fish["weight_grams"], caught_at=context.now))
         wallet = context.wallet

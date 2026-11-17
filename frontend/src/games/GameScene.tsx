@@ -105,12 +105,13 @@ export default function GameScene({ game, round, info, lowPower, liveFishing, fi
         camera.position.set(3.5,3.3,7.3); camera.lookAt(-.25,-.15,-1); pedestal.visible = false;light.intensity=2.1;rim.intensity=.7;
         const locationPalette:Record<string,{water:number;sky:number;leaves:number[]}>= {
           shore:{water:0x246c72,sky:0x91b8ae,leaves:[0x456d56,0x618365,0x365e50]},
+          carp:{water:0x496c70,sky:0x9eb3b3,leaves:[0x54766a,0x6a8275,0x3d665d]},
           river:{water:0x225f66,sky:0x86a9a4,leaves:[0x547a3c,0x71834a,0x3d663d]},
           mountain:{water:0x287c91,sky:0x9db5ca,leaves:[0x315e56,0x416b64,0x2d4e51]},
           golden:{water:0x4f7970,sky:0xd9b77c,leaves:[0xc39a42,0xa77a32,0x8d8646]},
         };
         const palette=locationPalette[fishingLocation]??locationPalette.shore;
-        scene.background=new THREE.Color(palette.sky);scene.fog=new THREE.Fog(palette.sky,13,27);
+        scene.background=new THREE.Color(palette.sky);scene.fog=new THREE.Fog(palette.sky,fishingLocation==='carp'?7:13,fishingLocation==='carp'?18:27);
         if(fishingLocation==='golden'){light.color.set(0xffdc96);light.intensity=2.4;}
         const water = mesh(new THREE.PlaneGeometry(19,15,1,1),palette.water,root,0,-0.63,-1.65);water.rotation.x=-Math.PI/2;(water.material as THREE.MeshStandardMaterial).roughness=0.26;
         const shore=box(root,0,-0.34,-4.7,9,0.8,1,0xd3c5ad);shore.rotation.x=-0.12;
@@ -135,6 +136,12 @@ export default function GameScene({ game, round, info, lowPower, liveFishing, fi
           mesh(new THREE.CylinderGeometry(.11,.13,.04,16),0x8e623c,kettle,0,.22,0);
           sphere(kettle,0,.26,0,.035,INK);const spout=mesh(new THREE.CylinderGeometry(.025,.06,.2,12),0xb98555,kettle,.2,.11,0);spout.rotation.z=-.8;
           ring(kettle,.13,.023,0x805b3b,-.17,.12,0);
+        }
+        if(fishingLocation==='carp'){
+          const sign=new THREE.Group();sign.position.set(-2.6,-.1,1.7);sign.rotation.y=.2;root.add(sign);
+          box(sign,0,.28,0,.07,.6,.07,0x6e7566);box(sign,0,.62,.02,1.2,.36,.09,0x435c55);
+          plate(sign,'ПРУД КАРПА',0,.62,.073,1.08,.28,'#e1e8d7','#435c55');
+          for(const x of [-2.25,-.2]){mesh(new THREE.CylinderGeometry(.06,.08,.9,9),0x6b7768,root,x,-.3,.1);sphere(root,x,.18,.1,.075,0x879b7b);}
         }
         if(fishingLocation==='river'){
           for(let i=0;i<3;i++){
