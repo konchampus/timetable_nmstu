@@ -222,7 +222,9 @@ class DatabaseInvariants(unittest.IsolatedAsyncioTestCase):
         from app.games.schemas import StartRound
         body = StartRound(key="legacy-retry", game="mines", bet=10, mines=3)
         expected = await self.service_call("start", body)
-        old_parameters = {k: v for k, v in body.model_dump().items() if k not in {"key", "gameplay_version"}}
+        # Freeze the original wire contract, not the evolving current schema.
+        # New nullable location/skin/mode fields must not alter a legacy retry.
+        old_parameters = {"game": "mines", "bet": 10, "choice": None, "mines": 3}
         encoded = __import__("json").dumps({"operation": "rounds", "parameters": old_parameters}, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
         async with self.factory() as session:
             journal = await session.scalar(select(GameAction).where(GameAction.user_id == self.principal.id, GameAction.key == "legacy-retry"))
