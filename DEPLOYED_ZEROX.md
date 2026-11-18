@@ -1,5 +1,17 @@
 # Фактическое развёртывание
 
+## Монополия · 18.11.2026
+
+- Разрешение пользователя: после проверок в main и на prod. Runtime-код: [97a0fc1](https://github.com/konchampus/timetable_nmstu/commit/97a0fc1422aca6c5620e1c835d2a5576a9da6138). Main дополнительно содержит только исправление dev-harness и результаты проверок; public bundle hashes совпадают.
+- Активированы отдельные API/web образы monopoly-97a0fc1; current указывает на immutable release97a0fc1422aca6c5620e1c835d2a5576a9da6138.
+- Перед миграцией выполнена штатная зашифрованная резервная копия. Применена добавочная0004_fishing_progression→0005_monopoly. Пользовательские данные не сбрасывались.
+- Gates:202 серверных+54 клиентских,25 UI checks (все12 прежних игр),9 PostgreSQL invariants, отдельные реальные гонки команд и репетиция миграции с сохранением синтетических данных. [Подробные проверки](<MONOPOLY_RELEASE_20261118.md>).
+- Production probe подтвердил права CRUD всех4 новых таблиц у runtime без CREATE, revision0005_monopoly, readiness200 и private catalog401; probe удалён до cutover.
+- Сравнение pre/post: container IDs bot/worker/PostgreSQL не изменились. API/web running, restarts0; API ERROR/Traceback count0 в последних150 строках за10минут.
+- Внешние HTTPS: главная и health200/statusok; новые index,MonopolyJS/CSS ассеты200; rooms/board без авторизации401 (до cutover rooms был404). Публичная страница осмотрена browser_* без обхода авторизации.
+- Startup curl56 восстановился штатным ограниченным retry; итог activation exit0, откат не требовался. Предыдущие API/web образы сохранены; rollback приложения не понижает схему и не удаляет данные.
+- Физический Telegram Android/iOS и партия двух реальных аккаунтов не проверялись; реальные пользовательские раунды для теста не создавались.
+
 ## Пруд Карпа и серверные квоты · 17.11.2026
 
 - Прямое разрешение пользователя: «залевай». Выпущен [679004d](https://github.com/konchampus/timetable_nmstu/commit/679004db3d6b0bc271cbc8f7a4a04d45b57f96c7), ветка feat/carp-pond-progression (основная реализация — 1f65ad6; 679004d фиксирует старый wire payload в DB regression).
