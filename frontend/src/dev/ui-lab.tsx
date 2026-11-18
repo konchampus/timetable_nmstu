@@ -29,7 +29,7 @@ if(import.meta.env.DEV){
     click('button','Сохранить запись');await sample('Заметки: сохранено в памяти',results);
     click('nav button','Игры');await wait(700);await sample('Каталог 12 игр',results);
     for(const title of ['Слоты','Рыбалка','Кости','Дартс','Боулинг','Баскетбол','Футбол','Монетка','Рулетка','Блэкджек','Сапёр','Колесо']){
-      const tile=[...document.querySelectorAll<HTMLButtonElement>('.games-tile')].find(el=>el.querySelector('strong')?.textContent===title);if(!tile)throw new Error('Нет плитки '+title);tile.click();await sample('Игра: '+title,results);if(params.get('active')==='1'&&title==='Блэкджек'){click('button','Остановиться');await sample('Блэкджек: завершён локально',results);}if(params.get('active')==='1'&&title==='Сапёр'){document.querySelector<HTMLButtonElement>('.games-cashout button')?.click();await sample('Сапёр: выплата локально',results);}click('.games-back','Все игры');await wait();
+      const tile=[...document.querySelectorAll<HTMLButtonElement>('.games-tile')].find(el=>el.querySelector('strong')?.textContent===title);if(!tile)throw new Error('Нет плитки '+title);tile.click();await sample('Игра: '+title,results);if(params.get('active')==='1'&&title==='Блэкджек'){click('button','Остановиться');await sample('Блэкджек: завершён локально',results);}if(params.get('active')==='1'&&title==='Сапёр'){document.querySelector<HTMLButtonElement>('.games-cashout button')?.click();await sample('Сапёр: выплата локально',results);}click('button[aria-label="Закрыть игровое окно"]','');await wait();
     }
     // Inspect the new location even when the main matrix uses saved active rounds.
     click('.games-tabs button','Играть');await wait();
@@ -43,7 +43,7 @@ if(import.meta.env.DEV){
       for(const button of document.querySelectorAll<HTMLElement>('.fishing-world button'))if(getComputedStyle(button).userSelect!=='none')throw new Error('Выделение текста кнопки рыбалки не отключено');
       await sample('Пруд Карпа: босс, плеер без файла, кнопки без выделения',results);
     }
-    click('.games-back','Все игры');
+    click('button[aria-label="Закрыть игровое окно"]','');
     click('.games-tabs button','История');await sample('История и журнал',results);
     click('.games-tabs button','Рейтинг');await sample('Рейтинг',results);
    }catch(error){results.push({suiteError:String(error),...measure()});}
