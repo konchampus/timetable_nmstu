@@ -33,6 +33,9 @@ async def settings(body: SettingsDTO, user: User = Depends(current_user), sessio
 @router.delete("/me", status_code=204)
 async def remove_account(body: DeleteAccount, user: User = Depends(current_user), session: AsyncSession = Depends(get_session)):
     row = await lock_authenticated_user(session, user)
+    # Composition-level hook; cleanup participates in this deletion transaction.
+    from .games.monopoly_cleanup import cleanup_account
+    await cleanup_account(session, row)
     row.active = False
     await session.flush()
     await session.execute(delete(AuthSession).where(AuthSession.user_id == user.id))

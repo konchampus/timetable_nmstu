@@ -1,3 +1,4 @@
+import {monopolyMock} from './monopoly-mock';
 import {catalog,demoUser,group,teacher,initialNotes,inventory,makeRound,schedule} from './ui-fixtures';
 import type {GameId,Round} from '../games/types';
 import {isSport,replay,readChallenge} from '../games/arcade';
@@ -5,6 +6,7 @@ import type {Note} from '../lib/types';
 export const audit={requests:[] as {method:string;path:string;handled:boolean}[],errors:[] as string[]};
 export function installMock(){
  const params=new URLSearchParams(location.search);let user=structuredClone(demoUser),notes=structuredClone(initialNotes);let rounds:Round[]=params.get('active')==='1'?(['basketball','blackjack','mines','fishing'] as GameId[]).map(makeRound):[];
+ const monopoly=monopolyMock(user.name);
  let favorites=[group],daily=true;
  window.Telegram={WebApp:{initData:'query_id=UI_LAB_NOT_VALID_FOR_SERVER&user=%7B%22id%22%3A999999%7D&hash=DEMO_ONLY',colorScheme:params.get('theme')==='dark'?'dark':'light',version:'demo',ready(){},expand(){},onEvent(){},offEvent(){},close(){},requestWriteAccess(cb){cb(false);}}};
  const json=(value:unknown,status=200)=>Promise.resolve(new Response(JSON.stringify(value),{status,headers:{'Content-Type':'application/json'}}));
@@ -27,6 +29,7 @@ export function installMock(){
   if(p==='/notes'&&method==='GET'){const q=url.searchParams.get('q')??'',kind=url.searchParams.get('kind');return json({items:notes.filter(n=>(!kind||n.kind===kind)&&(n.title+n.text).includes(q))});}
   if(p==='/notes'&&method==='POST'){const note={...initialNotes[0],...body,id:'demo-note-'+(notes.length+1),version:1} as Note;notes.unshift(note);return json(note);}
   if(p.startsWith('/notes/')){const old=notes.find(n=>n.id===p.split('/').pop());if(method==='DELETE'){notes=notes.filter(n=>n!==old);return json({});}const note={...old,...body,version:(old?.version??0)+1} as Note;notes=notes.map(n=>n===old?note:n);return json(note);}
+  const mono=monopoly(p,method,body);if(mono){if(p.endsWith('/events'))await new Promise(resolve=>setTimeout(resolve,1500));return json(mono);}
   if(p==='/games/catalog')return json({items:catalog});
   if(p==='/games/wallet')return json({balance:1200,inventory_value:120,daily_available:daily,rod_level:3});
   if(p==='/games/fishing/inventory')return json(inventory);

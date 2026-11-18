@@ -11,6 +11,7 @@ from .config import config
 from .db import engine
 from .http_limits import BodyLimitMiddleware, TrustedHostJSONMiddleware
 from .games.router import router as game_router
+from .games.monopoly_router import router as monopoly_router
 
 
 @asynccontextmanager
@@ -25,6 +26,7 @@ app.add_middleware(BodyLimitMiddleware)
 app.add_middleware(TrustedHostJSONMiddleware, allowed_hosts=config.allowed_hosts)
 app.include_router(router, prefix="/api")
 app.include_router(game_router, prefix="/api")
+app.include_router(monopoly_router, prefix="/api")
 
 
 @app.middleware("http")

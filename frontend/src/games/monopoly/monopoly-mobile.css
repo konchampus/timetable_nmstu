@@ -1,0 +1,833 @@
+/* Mobile is a bounded task workspace, not a smaller desktop column. */
+.mono-v2 {
+  min-width:0;
+  --m-accent-text:var(--m-accent);
+}
+[data-theme=dark] .mono-v2 { --m-accent-text:var(--accent,#a9c2ff); }
+.mono-v2 .mono-link,.mono-v2 a { color:var(--m-accent-text); }
+.mono-v2 h1,.mono-v2 h2,.mono-v2 h3,.mono-v2 h4 {
+  font-family:inherit;
+}
+.mono-v2 h2 {
+  font-size:20px;
+  letter-spacing:-.02em;
+}
+.mono-v2 h3 {
+  font-size:17px;
+}
+.mono-v2 h4 {
+  font-size:15px;
+}
+.mono-v2 button {
+  min-height:44px;
+}
+.mono-v2 .mono-cell {
+  min-height:0;
+}
+.mono-v2 .mono-board-toolbar button {
+  min-height:44px;
+  height:44px;
+}
+.mono-v2 .mono-icon {
+  width:44px;
+  min-width:44px;
+  height:44px;
+}
+.mono-v2 input,.mono-v2 select {
+  font-size:16px;
+}
+.mono-v2 .mono-header {
+  min-height:76px;
+}
+.mono-v2 .mono-heading h1 {
+  font-size:23px;
+}
+.mono-v2 .mono-heading span {
+  display:block;
+  max-width:44ch;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.mono-v2 .mono-saving {
+  position:absolute;
+  bottom:8px;
+  left:50%;
+  transform:translateX(-50%);
+  padding:4px 12px;
+  border-radius:8px;
+  background:var(--m-ink);
+  color:var(--m-bg);
+  font-size:12px;
+  pointer-events:none;
+  z-index:8;
+}
+.mono-desktop-layout {
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 360px;
+  max-width:1500px;
+  margin:auto;
+}
+.mono-desktop-board {
+  padding:20px;
+  min-width:0;
+  background:var(--m-soft);
+}
+.mono-desktop-board>.mono-board-scroll {
+  width:min(100%,calc(100dvh - 200px));
+}
+.mono-v2 .mono-sidebar {
+  min-width:0;
+}
+.mono-v2 .mono-action-panel p {
+  font-size:14px;
+}
+.mono-v2 .mono-action-panel {
+  gap:12px;
+}
+.mono-v2 .mono-action-row button {
+  font-size:14px;
+}
+.mono-v2 .mono-player {
+  margin:0;
+  min-width:0;
+}
+.mono-v2 .mono-color-picker button {
+  width:44px;
+  height:44px;
+}
+.mono-v2 .mono-secondary {
+  white-space:normal;
+}
+.mono-v2 .mono-checkbox {
+  min-height:44px;
+  font-size:14px!important;
+}
+.mono-v2 .mono-checkbox input {
+  width:20px;
+  height:20px;
+}
+.mono-segmented {
+  display:flex;
+  background:var(--m-soft);
+  border-radius:12px;
+  padding:4px;
+  gap:4px;
+}
+.mono-segmented button {
+  flex:1;
+  border:0;
+  border-radius:9px;
+  background:transparent;
+  color:var(--m-muted);
+  font-weight:650;
+}
+.mono-segmented button[aria-pressed=true] {
+  background:var(--m-bg);
+  color:var(--m-accent-text);
+}
+.mono-lobby-v2 {
+  max-width:760px;
+  padding:28px 24px;
+  display:grid;
+  gap:18px;
+}
+.mono-lobby-v2>p,.mono-mode-description {
+  color:var(--m-muted);
+  font-size:14px;
+}
+.mono-setup {
+  display:grid;
+  gap:16px;
+}
+.mono-setup>.mono-primary {
+  width:100%;
+}
+.mono-lobby-v2 .mono-form-row {
+  grid-template-columns:minmax(0,1fr) 84px;
+}
+.mono-v2 .mono-room-row span {
+  font-size:12px;
+}
+.mono-v2 .mono-room-list {
+  margin-top:12px;
+}
+.mono-assets {
+  padding:20px;
+  min-width:0;
+}
+.mono-assets>header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:16px;
+}
+.mono-assets h2>span {
+  color:var(--m-muted);
+  font-size:14px;
+}
+.mono-assets>header label {
+  max-width:170px;
+  flex:1;
+}
+.mono-assets .mono-debt-note {
+  padding:12px 0;
+  color:var(--m-ink);
+  font-weight:600;
+}
+.mono-asset-list {
+  display:grid;
+  gap:0;
+}
+.mono-asset-row {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  width:100%;
+  text-align:left;
+  min-width:0;
+  padding:12px 0;
+  border:0;
+  border-bottom:1px solid var(--m-line);
+  background:transparent;
+  color:var(--m-ink);
+}
+.mono-asset-row>svg:first-child {
+  width:62px;
+  height:52px;
+  flex-shrink:0;
+}
+.mono-asset-row>span {
+  display:grid;
+  gap:4px;
+  min-width:0;
+  flex:1;
+}
+.mono-asset-row strong {
+  font-size:14px;
+  overflow-wrap:anywhere;
+}
+.mono-asset-row small {
+  font-size:12px;
+}
+.mono-asset-row>b {
+  font-size:14px;
+}
+.mono-asset-row>svg:last-child {
+  flex-shrink:0;
+}
+.mono-desktop-board>.mono-assets {
+  margin-top:24px;
+  background:var(--m-bg);
+  border-radius:12px;
+}
+.mono-desktop-board .mono-asset-list {
+  grid-template-columns:1fr 1fr;
+  column-gap:24px;
+}
+.mono-deals,.mono-menu {
+  padding:20px;
+  border-top:1px solid var(--m-line);
+  display:grid;
+  gap:14px;
+}
+.mono-deals>h3 {
+  margin-top:12px;
+}
+.mono-deals p,.mono-menu p {
+  font-size:14px;
+  overflow-wrap:anywhere;
+}
+.mono-menu small {
+  font-size:12px;
+}
+.mono-offer,.mono-agreement {
+  display:grid;
+  gap:10px;
+  padding:16px 0;
+  border-block:1px solid var(--m-line);
+}
+.mono-offer h4 {
+  margin-top:8px;
+}
+.mono-agreement+.mono-agreement {
+  border-top:0;
+}
+.mono-contract-form summary {
+  cursor:pointer;
+  min-height:44px;
+  padding:12px 0;
+  color:var(--m-accent-text);
+  font-weight:600;
+}
+.mono-contract-form form,.mono-trade-form {
+  display:grid;
+  gap:16px;
+}
+.mono-v2 fieldset {
+  min-width:0;
+  border:1px solid var(--m-line);
+  border-radius:10px;
+  padding:14px;
+  display:grid;
+  gap:8px;
+}
+.mono-v2 legend {
+  font-weight:650;
+  padding:0 6px;
+}
+.mono-redemption {
+  padding-left:24px;
+  color:var(--m-muted);
+  font-size:12px!important;
+}
+.mono-trade-total {
+  display:grid;
+  gap:8px;
+  border-block:1px solid var(--m-line);
+  padding:16px 0;
+}
+.mono-v2 .mono-rules-v2 {
+  padding:0;
+  border:0;
+  background:none;
+  display:grid;
+  gap:12px;
+}
+.mono-rules-v2 h3 {
+  margin-top:12px;
+}
+.mono-v2 .mono-rules-v2 p {
+  font-size:15px;
+  line-height:1.65;
+  margin:0;
+  max-width:70ch;
+}
+.mono-v2 .mono-property-v2 {
+  margin:0;
+  padding:0;
+  background:none;
+  display:grid;
+  gap:16px;
+}
+.mono-property-v2>svg {
+  width:100%;
+  height:140px;
+}
+.mono-v2 .mono-property-v2 p {
+  font-size:15px;
+}
+.mono-v2 .mono-property-v2 dl {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin:0;
+}
+.mono-property-v2 dt {
+  font-size:13px;
+}
+.mono-property-v2 dd {
+  font-size:18px;
+}
+.mono-v2 .mono-property-v2 .mono-rents {
+  display:grid;
+  grid-template-columns:1fr;
+  font-size:14px;
+  gap:4px;
+}
+.mono-v2 .mono-property-v2 small {
+  font-size:12px;
+}
+.mono-v2 .mono-property-actions {
+  display:grid;
+  grid-template-columns:1fr;
+  padding:0;
+}
+.mono-v2 .mono-property-actions button {
+  font-size:15px;
+  background:var(--m-soft);
+}
+/* Dialogs inherit the game tokens and stay in its native top-layer focus stack. */
+.mono-modal {
+  position:fixed;
+  inset:0;
+  margin:auto;
+  padding:0;
+  border:0;
+  border-radius:16px;
+  width:min(620px,calc(100% - 32px));
+  max-width:none;
+  max-height:calc(100dvh - 48px);
+  color:var(--m-ink);
+  background:var(--m-bg);
+  box-shadow:0 18px 60px #14253640;
+  overflow:hidden;
+}
+.mono-modal::backdrop {
+  background:#0c1b2b80;
+}
+.mono-modal:not([open]) {
+  display:none;
+}
+.mono-modal[open] {
+  display:flex;
+  flex-direction:column;
+}
+.mono-modal>header {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:16px 20px;
+  border-bottom:1px solid var(--m-line);
+  flex-shrink:0;
+}
+.mono-modal h2 {
+  font-size:20px;
+  line-height:1.25;
+  overflow-wrap:anywhere;
+}
+.mono-modal-body {
+  padding:20px;
+  overflow:auto;
+  overscroll-behavior:contain;
+  display:grid;
+  gap:16px;
+  min-height:0;
+}
+.mono-modal-body>p {
+  font-size:15px;
+  line-height:1.6;
+}
+.mono-modal .mono-trade-columns {
+  gap:12px;
+}
+.mono-modal .mono-primary,.mono-modal .mono-danger {
+  white-space:normal;
+}
+.mono-map-modal {
+  width:min(1100px,calc(100% - 32px));
+  height:calc(100dvh - 48px);
+}
+.mono-map-modal .mono-modal-body {
+  flex:1;
+  grid-template-rows:auto minmax(0,1fr) auto;
+  overflow:hidden;
+}
+.mono-map-modal .mono-board-scroll.is-zoomed {
+  min-height:0;
+  max-height:none;
+  width:100%;
+  height:100%;
+  overflow:auto;
+}
+.mono-map-modal .mono-board-scroll.is-zoomed .mono-board {
+  width:1320px;
+  min-width:1320px;
+}
+.mono-v2 .mono-bottom-nav {
+  display:none;
+}
+@media(max-width:1050px) and (min-width:701px) {
+  .mono-desktop-layout {
+    grid-template-columns:minmax(0,1fr) 310px;
+  }
+  .mono-desktop-board {
+    padding:12px;
+  }
+  .mono-desktop-board .mono-asset-list {
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:700px) {
+  .game-window:has(.mono-v2) .game-window-shell {
+    height:100dvh;
+    min-height:0;
+    overflow:hidden;
+  }
+  .game-window:has(.mono-v2) .game-window-scroll {
+    height:100%;
+    min-height:0;
+    overflow:hidden;
+    display:flex;
+  }
+  .game-window:has(.mono-v2) .game-window-content {
+    height:100%;
+    min-height:0;
+    width:100%;
+    display:flex;
+    padding:0!important;
+    overflow:hidden;
+  }
+  .game-window:has(.mono-v2)>.game-window-shell>.game-window-header {
+    top:calc(10px + max(env(safe-area-inset-top,0px),var(--tg-safe-top,0px)));
+    right:8px;
+  }
+  .mono-v2 {
+    width:100%;
+    height:100%;
+    min-height:0;
+    max-width:100%;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    border-radius:0;
+    font-size:15px;
+  }
+  .game-window:has(.mono-v2) .mono-header {
+    height:calc(64px + max(env(safe-area-inset-top,0px),var(--tg-safe-top,0px)));
+    min-height:calc(64px + max(env(safe-area-inset-top,0px),var(--tg-safe-top,0px)));
+    padding: max(env(safe-area-inset-top,0px),var(--tg-safe-top,0px)) 58px 0 16px;
+    gap:8px;
+  }
+  .mono-v2 .mono-heading {
+    min-width:0;
+    flex:1;
+  }
+  .mono-v2 .mono-heading>div {
+    min-width:0;
+  }
+  .mono-v2 .mono-heading h1 {
+    font-size:20px;
+  }
+  .mono-v2 .mono-heading span {
+    font-size:12px;
+    max-width:100%;
+  }
+  .mono-v2 .mono-header-tools {
+    gap:0;
+  }
+  .mono-v2 .mono-connection {
+    display:none;
+  }
+  .mono-v2 .mono-status-area {
+    flex-shrink:0;
+    max-height:32dvh;
+    overflow:auto;
+  }
+  .mono-v2 .mono-error,.mono-v2 .mono-notice {
+    margin:8px 12px;
+    padding:10px 12px;
+    font-size:13px;
+  }
+  .mono-v2 .mono-error button {
+    min-height:44px;
+  }
+  .mono-v2 .mono-main-scroll {
+    flex:1;
+    min-height:0;
+    min-width:0;
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+  }
+  .mono-v2 .mono-player-chips {
+    display:flex;
+    gap:8px;
+    padding:8px 12px;
+    overflow-x:auto;
+    overflow-y:hidden;
+    flex-shrink:0;
+    border-bottom:1px solid var(--m-line);
+    max-width:100%;
+    scrollbar-width:thin;
+  }
+  .mono-v2 .mono-player-chips .mono-player {
+    display:flex;
+    flex:0 0 auto;
+    gap:6px;
+    padding:5px 8px;
+    min-height:48px;
+    margin:0;
+    max-width:175px;
+  }
+  .mono-player-chips .mono-player>div {
+    flex:initial;
+    display:grid;
+    min-width:0;
+  }
+  .mono-player-chips .mono-player strong {
+    font-size:12px;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    max-width:125px;
+  }
+  .mono-player-chips .mono-player span:not(.mono-token) {
+    font-size:12px;
+  }
+  .mono-v2 .mono-field-overview {
+    height:304px;
+    padding:0 12px;
+    background:var(--m-soft);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  .mono-field-overview>.mono-board-toolbar {
+    height:44px;
+    min-height:44px;
+    margin:0;
+    width:100%;
+  }
+  .mono-field-overview .mono-board-scroll {
+    width:260px!important;
+    height:260px;
+    max-width:100%;
+    max-height:260px;
+    margin:0;
+    overflow:hidden;
+    flex-shrink:0;
+    border-width:2px;
+    border-radius:10px;
+  }
+  .mono-field-overview .mono-board {
+    width:100%;
+    height:100%;
+    aspect-ratio:1;
+  }
+  .mono-v2 .mono-action-panel {
+    border:0;
+    border-top:1px solid var(--m-line);
+    display:grid;
+    grid-template-columns:1fr;
+    padding:16px;
+    gap:12px;
+    min-height:180px;
+    background:var(--m-bg);
+  }
+  .mono-v2 .mono-action-panel h3 {
+    font-size:19px;
+  }
+  .mono-v2 .mono-action-panel h4 {
+    font-size:17px;
+  }
+  .mono-v2 .mono-action-panel p {
+    font-size:15px;
+    line-height:1.5;
+  }
+  .mono-v2 .mono-action-panel button {
+    font-size:16px;
+    min-height:48px;
+  }
+  .mono-v2 .mono-roll {
+    height:52px;
+  }
+  .mono-v2 .mono-bottom-nav {
+    display:grid;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    border-top:1px solid var(--m-line);
+    background:var(--m-bg);
+    padding:4px 4px calc(4px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-bottom,0px)));
+    flex-shrink:0;
+    z-index:2;
+  }
+  .mono-bottom-nav>button {
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:3px;
+    min-width:0;
+    min-height:56px;
+    padding:5px 0;
+    border:0;
+    background:transparent;
+    color:var(--m-muted);
+    font-size:11px;
+    font-weight:600;
+    border-radius:10px;
+  }
+  .mono-bottom-nav>button[aria-pressed=true] {
+    color:var(--m-accent-text);
+    background:var(--m-soft);
+  }
+  .mono-bottom-nav>button>span {
+    position:relative;
+    display:flex;
+  }
+  .mono-bottom-nav b {
+    position:absolute;
+    left:15px;
+    top:-6px;
+    min-width:16px;
+    height:16px;
+    border-radius:8px;
+    background:#2254ff;
+    color:#fff;
+    padding:0 4px;
+    display:grid;
+    place-items:center;
+    font-size:10px;
+    line-height:1;
+  }
+  .mono-v2 .mono-saving {
+    bottom:calc(70px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-bottom,0px)));
+  }
+  .mono-v2 .mono-assets,.mono-v2 .mono-deals,.mono-v2 .mono-menu {
+    padding:18px 16px;
+    border-top:0;
+  }
+  .mono-v2 .mono-assets>header {
+    align-items:start;
+  }
+  .mono-v2 .mono-assets h2,.mono-v2 .mono-deals h2,.mono-v2 .mono-menu h2 {
+    font-size:22px;
+  }
+  .mono-v2 .mono-asset-row {
+    gap:9px;
+    padding:12px 0;
+  }
+  .mono-v2 .mono-asset-row>svg:first-child {
+    width:54px;
+    height:48px;
+  }
+  .mono-v2 .mono-asset-row strong {
+    font-size:14px;
+  }
+  .mono-v2 .mono-asset-row small {
+    font-size:12px;
+  }
+  .mono-v2 .mono-menu>button {
+    justify-content:start;
+    min-height:48px;
+    font-size:15px;
+  }
+  .mono-v2 .mono-chat {
+    border:0;
+    min-height:100%;
+    height:100%;
+    padding:12px 16px;
+    margin:0;
+    display:flex;
+  }
+  .mono-v2 .mono-chat-tabs {
+    min-height:48px;
+    flex-shrink:0;
+  }
+  .mono-v2 .mono-chat-tabs button {
+    font-size:15px;
+    min-height:44px;
+  }
+  .mono-v2 .mono-chat-messages {
+    min-height:80px;
+    max-height:none;
+    flex:1;
+  }
+  .mono-v2 .mono-chat-message strong {
+    font-size:13px;
+  }
+  .mono-v2 .mono-chat-message time {
+    font-size:11px;
+  }
+  .mono-v2 .mono-chat-message p,.mono-v2 .mono-log-entry,.mono-v2 .mono-chat-empty {
+    font-size:15px;
+  }
+  .mono-v2 .mono-chat-label {
+    font-size:12px!important;
+  }
+  .mono-v2 .mono-chat form input {
+    font-size:16px;
+    min-height:48px!important;
+  }
+  .mono-v2 .mono-chat form .mono-primary {
+    min-height:48px;
+    min-width:48px;
+  }
+  .mono-v2 .mono-chat>small {
+    font-size:11px;
+  }
+  .mono-v2 .mono-lobby-v2 {
+    padding:22px 16px;
+    gap:16px;
+  }
+  .mono-v2 .mono-lobby-v2 h2 {
+    font-size:24px;
+    line-height:1.2;
+  }
+  .mono-v2 .mono-lobby-v2 .mono-room-list h3 {
+    font-size:17px;
+  }
+  .mono-v2 .mono-lobby-v2 label {
+    font-size:14px;
+  }
+  .mono-v2 .mono-room-row {
+    gap:10px;
+  }
+  .mono-v2 .mono-loading {
+    min-height:0;
+    flex:1;
+    display:grid;
+    place-items:center;
+    padding:24px;
+  }
+  .mono-v2 .mono-modal {
+    width:100%;
+    max-width:100%;
+    height:100dvh;
+    max-height:100dvh;
+    border-radius:0;
+  }
+  .mono-modal>header {
+    min-height:64px;
+    padding:calc(10px + max(env(safe-area-inset-top,0px),var(--tg-safe-top,0px))) 12px 10px 16px;
+  }
+  .mono-modal-body {
+    padding:16px 16px calc(20px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-bottom,0px)));
+    flex:1;
+  }
+  .mono-modal h2 {
+    font-size:20px;
+  }
+  .mono-modal .mono-trade-columns {
+    grid-template-columns:1fr;
+  }
+  .mono-modal .mono-form-row {
+    gap:12px;
+  }
+  .mono-v2 .mono-property-v2 .mono-rents {
+    grid-template-columns:1fr;
+  }
+  .mono-v2 .mono-property-v2 .mono-property-actions {
+    grid-template-columns:1fr;
+  }
+  .mono-v2 .mono-property-v2 .mono-property-actions button {
+    min-height:48px;
+  }
+  .mono-v2 .mono-map-modal .mono-modal-body {
+    padding:12px 0 calc(12px + max(env(safe-area-inset-bottom,0px),var(--tg-safe-bottom,0px)));
+    gap:10px;
+  }
+  .mono-map-modal .mono-modal-body>p,.mono-map-modal .mono-modal-body>.mono-secondary {
+    margin:0 12px;
+  }
+  .mono-v2 .mono-map-modal .mono-board-scroll {
+    border-radius:0;
+  }
+}
+@media(max-width:380px) {
+  .mono-v2 .mono-field-overview {
+    height:296px;
+  }
+  .mono-field-overview .mono-board-scroll {
+    width:252px!important;
+    height:252px;
+    max-height:252px;
+  }
+  .mono-v2 .mono-action-panel {
+    padding:14px 16px;
+    gap:10px;
+  }
+  .mono-v2 .mono-heading span {
+    font-size:11px;
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  .mono-v2 *,.mono-v2 *::before,.mono-v2 *::after {
+    animation:none!important;
+    transition:none!important;
+    scroll-behavior:auto!important;
+  }
+}

@@ -7,6 +7,7 @@ from app.config import config
 from app.db import Base
 import app.models  # register core tables, no game imports inside core models
 import app.games.models  # register owned game metadata at composition boundary
+import app.games.monopoly_models  # multiplayer aggregate metadata
 
 if context.config.config_file_name:
     fileConfig(context.config.config_file_name)

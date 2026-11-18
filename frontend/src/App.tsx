@@ -8,6 +8,7 @@ import Search from './components/Search';
 import Notes from './components/Notes';
 import type {NoteContext} from './components/Notes';
 import {gameFromUrl} from './games/types';
+import {parseMonopolyLink} from './games/monopoly-link';
 import Profile from './components/Profile';
 const Games=lazy(()=>import('./games/Games'));
 type Tab='today'|'week'|'search'|'games'|'profile';
@@ -23,7 +24,8 @@ export default function App(){
 }
 function AuthenticatedApp({initialUser,onUserChange,onDeleted}:{initialUser:User;onUserChange:(user:User)=>void;onDeleted:()=>void}){
  const [requestedGame]=useState(gameFromUrl);
- const [user,setUser]=useState(initialUser),[tab,setTab]=useState<Tab>(requestedGame?'games':'today'),[gamesOpened,setGamesOpened]=useState(Boolean(requestedGame)),[browsing,setBrowsing]=useState<string|null>(null),[schedule,setSchedule]=useState<Schedule|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState(''),[now,setNow]=useState(new Date()),[notesOpen,setNotesOpen]=useState(false),[noteDirty,setNoteDirty]=useState(false),[noteContext,setNoteContext]=useState<NoteContext|null>(null),[refresh,setRefresh]=useState(0);const scheduleRequest=useRef(0),settingsBusy=useRef(false);
+ const [requestedMonopoly]=useState(()=>parseMonopolyLink().requested);
+ const [user,setUser]=useState(initialUser),[tab,setTab]=useState<Tab>(requestedGame||requestedMonopoly?'games':'today'),[gamesOpened,setGamesOpened]=useState(Boolean(requestedGame||requestedMonopoly)),[browsing,setBrowsing]=useState<string|null>(null),[schedule,setSchedule]=useState<Schedule|null>(null),[loading,setLoading]=useState(false),[error,setError]=useState(''),[now,setNow]=useState(new Date()),[notesOpen,setNotesOpen]=useState(false),[noteDirty,setNoteDirty]=useState(false),[noteContext,setNoteContext]=useState<NoteContext|null>(null),[refresh,setRefresh]=useState(0);const scheduleRequest=useRef(0),settingsBusy=useRef(false);
  useEffect(()=>{const tick=()=>setNow(new Date());const timer=setInterval(tick,15000);window.addEventListener('focus',tick);document.addEventListener('visibilitychange',tick);return ()=>{clearInterval(timer);window.removeEventListener('focus',tick);document.removeEventListener('visibilitychange',tick);};},[]);
  const applySettings=useCallback((settings:Settings)=>{setUser(current=>{const next={...current,settings};return next;});onUserChange({...user,settings});},[user,onUserChange]);
  // Re-read shared settings on returning from the bot; version guards avoid replacing newer local saves.

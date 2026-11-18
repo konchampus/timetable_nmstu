@@ -1,0 +1,96 @@
+/* Small, self-contained 3D objects. The flight layer never affects layout. */
+.mono-dice.mono-dice {
+  --die-size: clamp(32px, 7vw, 44px);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 10px 0;
+  flex: 0 0 auto;
+  pointer-events: none;
+  vertical-align: middle;
+}
+.mono-dice__pair { display: flex; gap: calc(var(--die-size) * .52); }
+.mono-dice__slot { position: relative; width: var(--die-size); height: calc(var(--die-size) * 1.22); }
+.mono-dice__camera { position: absolute; inset: 0; perspective: 460px; perspective-origin: 50% 40%; }
+.mono-dice__flight, .mono-dice__attitude, .mono-dice__cube {
+  width: var(--die-size);
+  height: var(--die-size);
+  transform-style: preserve-3d;
+}
+.mono-dice__flight { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+.mono-dice__attitude { transform: rotateX(-17deg) rotateY(-23deg) rotateZ(-5deg); }
+.mono-dice__slot:nth-child(2) .mono-dice__attitude { transform: rotateX(-17deg) rotateY(23deg) rotateZ(7deg); }
+/* SVGs are the actual six surfaces, never raster sprites or text glyphs. */
+.mono-dice .mono-dice__face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  overflow: visible;
+  backface-visibility: hidden;
+}
+.mono-dice__face--1 { transform: translateZ(calc(var(--die-size) / 2)); }
+.mono-dice__face--6 { transform: rotateY(180deg) translateZ(calc(var(--die-size) / 2)); }
+.mono-dice__face--2 { transform: rotateX(90deg) translateZ(calc(var(--die-size) / 2)); }
+.mono-dice__face--5 { transform: rotateX(-90deg) translateZ(calc(var(--die-size) / 2)); }
+.mono-dice__face--3 { transform: rotateY(90deg) translateZ(calc(var(--die-size) / 2)); }
+.mono-dice__face--4 { transform: rotateY(-90deg) translateZ(calc(var(--die-size) / 2)); }
+.mono-dice .mono-dice__ivory { fill: #fffaf0; stroke: #c4b69c; stroke-width: 1.8; }
+.mono-dice .mono-dice__rim { fill: none; stroke: #fffefb; stroke-width: 1; }
+.mono-dice .mono-dice__pip-well { fill: #cfbea1; }
+.mono-dice .mono-dice__pip { fill: #223e47; }
+.mono-dice .mono-dice__pip-light { fill: #638087; opacity: .7; }
+.mono-dice__shadow {
+  position: absolute;
+  left: -4%;
+  bottom: 2px;
+  width: 108%;
+  height: 15%;
+  border-radius: 50%;
+  background: rgb(26 53 54 / 19%);
+  filter: blur(3px);
+  transform: translate3d(0, 0, 0) scale(1);
+}
+.mono-dice__caption {
+  height: 15px;
+  font: 600 11px/15px system-ui, sans-serif;
+  color: #37575e;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.mono-dice__neutral { position: absolute; inset: -3px; display: grid; place-items: center; }
+.mono-dice .mono-dice__neutral svg { width: 100%; height: 100%; fill: #edf2ee; stroke: #718981; stroke-width: 2; }
+.mono-dice__neutral[data-waiting] { animation: mono-dice-wait 440ms ease-out 1 both; }
+.mono-dice__flight[data-moving] { animation: mono-dice-drop 780ms linear 1 both; will-change: transform; }
+.mono-dice__shadow[data-moving] { animation: mono-dice-contact 780ms linear 1 both; }
+/* Paired trajectories, asymmetric angular momentum, two diminishing impacts.
+   All rotations finish at identity; the inner cube owns the exact server face. */
+@keyframes mono-dice-drop {
+  0% { transform: translate3d(calc(var(--die-direction) * 24px), -66px, 30px) rotateX(-330deg) rotateY(290deg) rotateZ(calc(var(--die-direction) * -115deg)); animation-timing-function: cubic-bezier(.42, 0, .85, .48); }
+  40% { transform: translate3d(calc(var(--die-direction) * -4px), 2px, 0) rotateX(-32deg) rotateY(38deg) rotateZ(calc(var(--die-direction) * 21deg)); animation-timing-function: cubic-bezier(.16, .65, .4, 1); }
+  58% { transform: translate3d(calc(var(--die-direction) * 3px), -20px, 8px) rotateX(20deg) rotateY(-22deg) rotateZ(calc(var(--die-direction) * -12deg)); animation-timing-function: cubic-bezier(.5, 0, .85, .5); }
+  74% { transform: translate3d(0, 1px, 0) rotateX(-9deg) rotateY(9deg) rotateZ(calc(var(--die-direction) * 7deg)); animation-timing-function: cubic-bezier(.16, .65, .4, 1); }
+  84% { transform: translate3d(0, -6px, 2px) rotateX(5deg) rotateY(-4deg) rotateZ(calc(var(--die-direction) * -3deg)); animation-timing-function: cubic-bezier(.5, 0, .85, .5); }
+  94% { transform: translate3d(0, 0, 0) rotateX(-2deg) rotateY(1deg) rotateZ(1deg); }
+  100% { transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateZ(0deg); }
+}
+@keyframes mono-dice-contact {
+  0% { transform: scale(.5); opacity: .12; }
+  40%, 74%, 100% { transform: scale(1); opacity: 1; }
+  58% { transform: scale(.76); opacity: .45; }
+  84% { transform: scale(.9); opacity: .75; }
+}
+@keyframes mono-dice-wait {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
+  35% { transform: translate3d(-2px, -4px, 0) rotate(-12deg); }
+  65% { transform: translate3d(2px, -2px, 0) rotate(9deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mono-dice__flight[data-moving], .mono-dice__shadow[data-moving], .mono-dice__neutral[data-waiting] {
+    animation: none;
+    will-change: auto;
+  }
+}

@@ -22,6 +22,9 @@ class Config(BaseSettings):
     source_max_age_seconds: int = Field(default=86400, ge=900)
     source_timeout_seconds: int = Field(default=15, ge=2, le=60)
     source_request_spacing: float = Field(default=1.0, ge=0.2)
+    monopoly_event_max_polls: int = Field(default=64, ge=1, le=1024)
+    monopoly_event_user_polls: int = Field(default=2, ge=1, le=4)
+    monopoly_event_requests_per_minute: int = Field(default=60, ge=4, le=120)
     timezone: str = "Asia/Yekaterinburg"
     worker_interval_seconds: int = Field(default=20, ge=5, le=60)
 

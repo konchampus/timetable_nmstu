@@ -1,0 +1,735 @@
+{
+  "tiles": [
+    {
+      "id": 0,
+      "name": "Старт",
+      "kind": "special",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 1,
+      "name": "Рыбная лавка",
+      "kind": "street",
+      "price": 60,
+      "group": "brown",
+      "build": 50,
+      "rents": [
+        2,
+        10,
+        30,
+        90,
+        160,
+        250
+      ],
+      "art": "fish"
+    },
+    {
+      "id": 2,
+      "name": "Казна",
+      "kind": "chest",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 3,
+      "name": "Карповый пруд",
+      "kind": "street",
+      "price": 60,
+      "group": "brown",
+      "build": 50,
+      "rents": [
+        4,
+        20,
+        60,
+        180,
+        320,
+        450
+      ],
+      "art": "fish"
+    },
+    {
+      "id": 4,
+      "name": "Подоходный налог",
+      "kind": "tax",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 5,
+      "name": "Северный аэропорт",
+      "kind": "rail",
+      "price": 200,
+      "group": "rail",
+      "build": 0,
+      "rents": [],
+      "art": "airport"
+    },
+    {
+      "id": 6,
+      "name": "Ателье",
+      "kind": "street",
+      "price": 100,
+      "group": "sky",
+      "build": 50,
+      "rents": [
+        6,
+        30,
+        90,
+        270,
+        400,
+        550
+      ],
+      "art": "clothing"
+    },
+    {
+      "id": 7,
+      "name": "Шанс",
+      "kind": "chance",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 8,
+      "name": "Джинсовая фабрика",
+      "kind": "street",
+      "price": 100,
+      "group": "sky",
+      "build": 50,
+      "rents": [
+        6,
+        30,
+        90,
+        270,
+        400,
+        550
+      ],
+      "art": "clothing"
+    },
+    {
+      "id": 9,
+      "name": "Дом моды",
+      "kind": "street",
+      "price": 120,
+      "group": "sky",
+      "build": 50,
+      "rents": [
+        8,
+        40,
+        100,
+        300,
+        450,
+        600
+      ],
+      "art": "clothing"
+    },
+    {
+      "id": 10,
+      "name": "Тюрьма / в гостях",
+      "kind": "special",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 11,
+      "name": "Пекарня",
+      "kind": "street",
+      "price": 140,
+      "group": "pink",
+      "build": 100,
+      "rents": [
+        10,
+        50,
+        150,
+        450,
+        625,
+        750
+      ],
+      "art": "food"
+    },
+    {
+      "id": 12,
+      "name": "Электростанция",
+      "kind": "utility",
+      "price": 150,
+      "group": "utility",
+      "build": 0,
+      "rents": [],
+      "art": "energy"
+    },
+    {
+      "id": 13,
+      "name": "Кофейня",
+      "kind": "street",
+      "price": 140,
+      "group": "pink",
+      "build": 100,
+      "rents": [
+        10,
+        50,
+        150,
+        450,
+        625,
+        750
+      ],
+      "art": "food"
+    },
+    {
+      "id": 14,
+      "name": "Ресторан",
+      "kind": "street",
+      "price": 160,
+      "group": "pink",
+      "build": 100,
+      "rents": [
+        12,
+        60,
+        180,
+        500,
+        700,
+        900
+      ],
+      "art": "food"
+    },
+    {
+      "id": 15,
+      "name": "Восточный аэропорт",
+      "kind": "rail",
+      "price": 200,
+      "group": "rail",
+      "build": 0,
+      "rents": [],
+      "art": "airport"
+    },
+    {
+      "id": 16,
+      "name": "Радиостанция",
+      "kind": "street",
+      "price": 180,
+      "group": "orange",
+      "build": 100,
+      "rents": [
+        14,
+        70,
+        200,
+        550,
+        750,
+        950
+      ],
+      "art": "media"
+    },
+    {
+      "id": 17,
+      "name": "Казна",
+      "kind": "chest",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 18,
+      "name": "Киностудия",
+      "kind": "street",
+      "price": 180,
+      "group": "orange",
+      "build": 100,
+      "rents": [
+        14,
+        70,
+        200,
+        550,
+        750,
+        950
+      ],
+      "art": "media"
+    },
+    {
+      "id": 19,
+      "name": "Медиахолдинг",
+      "kind": "street",
+      "price": 200,
+      "group": "orange",
+      "build": 100,
+      "rents": [
+        16,
+        80,
+        220,
+        600,
+        800,
+        1000
+      ],
+      "art": "media"
+    },
+    {
+      "id": 20,
+      "name": "Бесплатная стоянка",
+      "kind": "special",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 21,
+      "name": "Студия игр",
+      "kind": "street",
+      "price": 220,
+      "group": "red",
+      "build": 150,
+      "rents": [
+        18,
+        90,
+        250,
+        700,
+        875,
+        1050
+      ],
+      "art": "technology"
+    },
+    {
+      "id": 22,
+      "name": "Шанс",
+      "kind": "chance",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 23,
+      "name": "Облачный сервис",
+      "kind": "street",
+      "price": 220,
+      "group": "red",
+      "build": 150,
+      "rents": [
+        18,
+        90,
+        250,
+        700,
+        875,
+        1050
+      ],
+      "art": "technology"
+    },
+    {
+      "id": 24,
+      "name": "Технопарк",
+      "kind": "street",
+      "price": 240,
+      "group": "red",
+      "build": 150,
+      "rents": [
+        20,
+        100,
+        300,
+        750,
+        925,
+        1100
+      ],
+      "art": "technology"
+    },
+    {
+      "id": 25,
+      "name": "Южный аэропорт",
+      "kind": "rail",
+      "price": 200,
+      "group": "rail",
+      "build": 0,
+      "rents": [],
+      "art": "airport"
+    },
+    {
+      "id": 26,
+      "name": "Рыбный порт",
+      "kind": "street",
+      "price": 260,
+      "group": "yellow",
+      "build": 150,
+      "rents": [
+        22,
+        110,
+        330,
+        800,
+        975,
+        1150
+      ],
+      "art": "fish"
+    },
+    {
+      "id": 27,
+      "name": "Океанская ферма",
+      "kind": "street",
+      "price": 260,
+      "group": "yellow",
+      "build": 150,
+      "rents": [
+        22,
+        110,
+        330,
+        800,
+        975,
+        1150
+      ],
+      "art": "fish"
+    },
+    {
+      "id": 28,
+      "name": "Водоканал",
+      "kind": "utility",
+      "price": 150,
+      "group": "utility",
+      "build": 0,
+      "rents": [],
+      "art": "water"
+    },
+    {
+      "id": 29,
+      "name": "Морской комбинат",
+      "kind": "street",
+      "price": 280,
+      "group": "yellow",
+      "build": 150,
+      "rents": [
+        24,
+        120,
+        360,
+        850,
+        1025,
+        1200
+      ],
+      "art": "fish"
+    },
+    {
+      "id": 30,
+      "name": "Отправляйтесь в тюрьму",
+      "kind": "special",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 31,
+      "name": "Текстильный завод",
+      "kind": "street",
+      "price": 300,
+      "group": "green",
+      "build": 200,
+      "rents": [
+        26,
+        130,
+        390,
+        900,
+        1100,
+        1275
+      ],
+      "art": "clothing"
+    },
+    {
+      "id": 32,
+      "name": "Модный квартал",
+      "kind": "street",
+      "price": 300,
+      "group": "green",
+      "build": 200,
+      "rents": [
+        26,
+        130,
+        390,
+        900,
+        1100,
+        1275
+      ],
+      "art": "clothing"
+    },
+    {
+      "id": 33,
+      "name": "Казна",
+      "kind": "chest",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 34,
+      "name": "Неделя моды",
+      "kind": "street",
+      "price": 320,
+      "group": "green",
+      "build": 200,
+      "rents": [
+        28,
+        150,
+        450,
+        1000,
+        1200,
+        1400
+      ],
+      "art": "clothing"
+    },
+    {
+      "id": 35,
+      "name": "Западный аэропорт",
+      "kind": "rail",
+      "price": 200,
+      "group": "rail",
+      "build": 0,
+      "rents": [],
+      "art": "airport"
+    },
+    {
+      "id": 36,
+      "name": "Шанс",
+      "kind": "chance",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 37,
+      "name": "Ювелирный дом",
+      "kind": "street",
+      "price": 350,
+      "group": "blue",
+      "build": 200,
+      "rents": [
+        35,
+        175,
+        500,
+        1100,
+        1300,
+        1500
+      ],
+      "art": "luxury"
+    },
+    {
+      "id": 38,
+      "name": "Налог на роскошь",
+      "kind": "tax",
+      "price": 0,
+      "group": "",
+      "build": 0,
+      "rents": []
+    },
+    {
+      "id": 39,
+      "name": "Люксовый бутик",
+      "kind": "street",
+      "price": 400,
+      "group": "blue",
+      "build": 200,
+      "rents": [
+        50,
+        200,
+        600,
+        1400,
+        1700,
+        2000
+      ],
+      "art": "luxury"
+    }
+  ],
+  "state": {
+    "rules_version": 1,
+    "players": [
+      {
+        "id": "11111111-1111-4111-8111-111111111111",
+        "name": "Капитан",
+        "cash": 1500,
+        "pos": 6,
+        "jail": 0,
+        "jailed": false,
+        "cards": [],
+        "out": false,
+        "ready": true,
+        "color": "#2254ff"
+      },
+      {
+        "id": "22222222-2222-4222-8222-222222222222",
+        "name": "Саша",
+        "cash": 1500,
+        "pos": 24,
+        "jail": 0,
+        "jailed": false,
+        "cards": [],
+        "out": false,
+        "ready": true,
+        "color": "#16876a"
+      }
+    ],
+    "phase": "lobby",
+    "turn": "11111111-1111-4111-8111-111111111111",
+    "properties": {
+      "1": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "3": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "5": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "6": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "8": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "9": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "11": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "12": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "13": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "14": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "15": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "16": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "18": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "19": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "21": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "23": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "24": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "25": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "26": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "27": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "28": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "29": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "31": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "32": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "34": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "35": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "37": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      },
+      "39": {
+        "owner": null,
+        "houses": 0,
+        "mortgaged": false
+      }
+    },
+    "dice": [
+      1,
+      1
+    ],
+    "doubles": 0,
+    "rolled": false,
+    "extra": false,
+    "pending": null,
+    "auction": null,
+    "debt": null,
+    "trade": null,
+    "log": [
+      "Комната создана. Пригласите друзей."
+    ],
+    "winner": null,
+    "bank_queue": []
+  }
+}
